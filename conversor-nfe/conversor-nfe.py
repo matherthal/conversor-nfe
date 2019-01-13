@@ -12,9 +12,10 @@ def process_nfes(local):
     '''
     parsed = [_parse_xml(f) for f in _fetch_xml_files(local)]
 
-    with open('output.csv', mode='w') as csv_file:
-        fieldnames = [ 'arquivo', 'xNome', 'cProd', 'cEAN', 'xProd'
-            ,'NCM', 'cEANTrib', 'CEST', 'orig' ]
+    with open('output.tsv', mode='w') as csv_file:
+        fieldnames = ['caminho', 'xNome', 'cProd', 'cEAN', 'xProd',
+                      'NCM', 'cEANTrib', 'CEST', 'orig', 'cProdANVISA']
+        
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter='\t')
         writer.writeheader()
         
@@ -22,7 +23,7 @@ def process_nfes(local):
             for nfe in nfes:
                 if nfe is not None:
                     writer.writerow(nfe)
-                    print(nfe.path)
+                    print(nfe['caminho'])
     
     print('Aplicação executou com sucesso!')
 
@@ -47,10 +48,10 @@ def _parse_xml(path):
         root = ET.parse(path)
 
         ns = {'ns': 'http://www.portalfiscal.inf.br/nfe'} 
-        inf = nfe.find('ns:NFe/ns:infNFe', ns)              
-        ide = inf.find('ns:ide', ns)  
+        inf = root.find('ns:NFe/ns:infNFe', ns)              
+        # ide = inf.find('ns:ide', ns)  
         emit = inf.find('ns:emit', ns)
-        dest = inf.find('ns:dest', ns)
+        # dest = inf.find('ns:dest', ns)
 
         if inf is None:
             return None
@@ -72,7 +73,9 @@ def _parse_xml(path):
                 CEST = prod.find('ns:CEST', ns)
                 if CEST is not None:
                     CEST = CEST.text
-                cProdANVISA = prod.find('ns:med/ns:cProdANVISA', ns).text
+                cProdANVISA = prod.find('ns:med/ns:cProdANVISA', ns)
+                if cProdANVISA:
+                    cProdANVISA = cProdANVISA.text
 
                 for node in det.find('ns:imposto/ns:ICMS', ns).findall('*'):
                     orig = node.find('ns:orig', ns).text
@@ -99,8 +102,16 @@ def _parse_xml(path):
 
 if __name__ == '__main__':
     try:
-        local = os.path.dirname(os.path.realpath(__file__))
+        local = None
+        if len(sys.argv) > 2:
+            raise Exception('Unknown parameters')
+        elif len(sys.argv) == 2:
+            local = os.path.abspath(sys.argv[1])
+        else:
+            local = os.path.dirname(os.path.realpath(__file__))
+        
         print('Lendo arquivos de: ' + local)
+        
         process_nfes(local)
     except:
         traceback.print_exc(file=sys.stdout)
