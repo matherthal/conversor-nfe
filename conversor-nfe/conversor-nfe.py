@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-import xml.etree.ElementTree as ET
+# -*- coding=utf-8 -*-
 import os
 import csv
 import sys, traceback
-import sys, traceback
+import xml.etree.ElementTree as ET
 
 def process_nfes(local):
     '''
@@ -50,10 +50,8 @@ def _parse_xml(path):
 
         ns = {'ns': 'http://www.portalfiscal.inf.br/nfe'} 
         inf = root.find('ns:NFe/ns:infNFe', ns)              
-        # ide = inf.find('ns:ide', ns)  
         emit = inf.find('ns:emit', ns)
-        # dest = inf.find('ns:dest', ns)
-
+        
         get_optional = lambda v: v.text if v else None
 
         if inf is None:
