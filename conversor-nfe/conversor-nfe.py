@@ -24,7 +24,6 @@ def process_nfes(local):
             for nfe in nfes:
                 if nfe is not None:
                     writer.writerow(nfe)
-                    print(nfe['caminho'])
     
     print('Aplicação executou com sucesso!')
 
@@ -80,14 +79,14 @@ def _parse_xml(path):
 
             # Processing attributes of imposto
             imposto = det.find('ns:imposto', ns)
-            vTotTrib = imposto.find('ns:vTotTrib', ns).text
+            vTotTrib = get_optional(imposto.find('ns:vTotTrib', ns))
             
             inner_icms = imposto.find('ns:ICMS', ns).findall('*')
             if len(inner_icms) > 1: raise Exception('Múltiplos campos dentro de ICMS')
             inner_icms = inner_icms[0]
 
             orig = inner_icms.find('ns:orig', ns).text
-            CST = inner_icms.find('ns:CST', ns).text
+            CST = get_optional(inner_icms.find('ns:CST', ns))
             vBCSTRet = get_optional(inner_icms.find('ns:vBCSTRet', ns))
             pST = get_optional(inner_icms.find('ns:pST', ns))
             vICMSSTRet = get_optional(inner_icms.find('ns:vICMSSTRet', ns))
