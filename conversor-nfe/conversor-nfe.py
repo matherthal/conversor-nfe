@@ -13,8 +13,8 @@ def process_nfes(local):
     parsed = [_parse_xml(f) for f in _fetch_xml_files(local)]
 
     with open('output.tsv', mode='w') as csv_file:
-        fieldnames = ['caminho', 'xNome', 'cProd', 'cEAN', 'xProd', 'NCM', 'cEANTrib', 'CEST', 
-                      'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vTotTrib', 
+        fieldnames = ['caminho', 'xNome', 'nNF', 'cProd', 'cEAN', 'xProd', 'NCM', 'cEANTrib', 
+                      'CEST', 'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vTotTrib', 
                       'orig', 'CST', 'vBCSTRet', 'pST', 'vICMSSTRet']
         
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter='\t')
@@ -50,6 +50,7 @@ def _parse_xml(path):
         ns = {'ns': 'http://www.portalfiscal.inf.br/nfe'} 
         inf = root.find('ns:NFe/ns:infNFe', ns)              
         emit = inf.find('ns:emit', ns)
+        nNF = inf.find('ns:ide/ns:nNF', ns).text
 
         get_optional = lambda v: v.text if v is not None else None
 
@@ -98,6 +99,7 @@ def _parse_xml(path):
             nfe = {
                 'caminho': path,
                 'xNome': xNome,
+                'nNF': nNF,
                 # Produto
                 'cProd': cProd,
                 'cEAN': cEAN,
