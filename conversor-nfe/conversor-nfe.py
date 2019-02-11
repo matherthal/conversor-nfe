@@ -50,8 +50,8 @@ def _parse_xml(path):
         ns = {'ns': 'http://www.portalfiscal.inf.br/nfe'} 
         inf = root.find('ns:NFe/ns:infNFe', ns)              
         emit = inf.find('ns:emit', ns)
-        
-        get_optional = lambda v: v.text if v else None
+
+        get_optional = lambda v: v.text if v is not None else None
 
         if inf is None:
             return None
@@ -76,6 +76,10 @@ def _parse_xml(path):
             vProd = prod.find('ns:vProd', ns).text
             cEANTrib = get_optional(prod.find('ns:cEANTrib', ns))
             cProdANVISA = get_optional(prod.find('ns:med/ns:cProdANVISA', ns))
+
+            qCom = str(round(float(qCom), 2))
+            vUnCom = str(round(float(vUnCom), 2))
+            vProd = str(round(float(vProd), 2))
 
             # Processing attributes of imposto
             imposto = det.find('ns:imposto', ns)
