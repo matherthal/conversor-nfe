@@ -19,7 +19,9 @@ def process_nfes(local):
                       'CEST', 'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vTotTrib', 
                       'icms_orig', 'icms_CST', 'icms_vBCSTRet', 'icms_pST', 'icms_vICMSSTRet', 
                       'pis_CST', 'pis_vBC', 'pis_pPIS', 'pis_vPIS', 
+                      'pis_qBCProd', 'pis_vAliqProd', 
                       'cofins_CST', 'cofins_vBC', 'cofins_pCOFINS', 'cofins_vCOFINS', 
+                      'cofins_qBCProd', 'cofins_vAliqProd', 
                       'total_vBC', 'total_vICMS', 'total_vICMSDeson', 'total_vFCPUFDest', 
                       'total_vICMSUFDest', 'total_vICMSUFRemet', 'total_vFCP', 'total_vBCST', 
                       'total_vST', 'total_vFCPST', 'total_vFCPSTRet', 'total_vProd', 
@@ -137,21 +139,37 @@ def _parse_xml(path):
             pis = imposto.find('ns:PIS', ns).findall('*')
             if len(pis) > 1: raise Exception('Múltiplos campos dentro de PIS')
             pis = pis[0]
-
+            
+            tags = ['CST', 'vBC', 'pPIS', 'vPIS', 'qBCProd', 'vAliqProd']
+            for c in pis.findall('*'):
+                tag = c.tag.split('}')[1]
+                if tag not in tags:
+                    raise Exception('Campos desconhecidos em PIS: ' + tag)
+            
             pis_CST = pis.find('ns:CST', ns).text
             pis_vBC = round_optional(pis.find('ns:vBC', ns))
             pis_pPIS = round_optional(pis.find('ns:pPIS', ns))
             pis_vPIS = round_optional(pis.find('ns:vPIS', ns))
+            pis_qBCProd = round_optional(pis.find('ns:qBCProd', ns))
+            pis_vAliqProd = round_optional(pis.find('ns:vAliqProd', ns))
 
             # Imposto COFINS
             cofins = imposto.find('ns:COFINS', ns).findall('*')
-            if len(cofins) > 1: raise Exception('Múltiplos campos dentro de ICMS')
+            if len(cofins) > 1: raise Exception('Múltiplos campos dentro de COFINS')
             cofins = cofins[0]
+
+            tags = ['CST', 'vBC', 'pCOFINS', 'vCOFINS', 'qBCProd', 'vAliqProd']
+            for c in cofins.findall('*'):
+                tag = c.tag.split('}')[1]
+                if tag not in tags:
+                    raise Exception('Campos desconhecidos em COFINS: ' + tag)
 
             cofins_CST = cofins.find('ns:CST', ns).text
             cofins_vBC = round_optional(cofins.find('ns:vBC', ns))
             cofins_pCOFINS = round_optional(cofins.find('ns:pCOFINS', ns))
             cofins_vCOFINS = round_optional(cofins.find('ns:vCOFINS', ns))
+            cofins_qBCProd = round_optional(cofins.find('ns:qBCProd', ns))
+            cofins_vAliqProd = round_optional(cofins.find('ns:vAliqProd', ns))
 
             nfe = {
                 'caminho': path,
@@ -183,11 +201,15 @@ def _parse_xml(path):
                 'pis_vBC': pis_vBC,
                 'pis_pPIS': pis_pPIS,
                 'pis_vPIS': pis_vPIS,
+                'pis_qBCProd': pis_qBCProd,
+                'pis_vAliqProd': pis_vAliqProd,
                 # Imposto COFINS
                 'cofins_CST': cofins_CST,
                 'cofins_vBC': cofins_vBC,
                 'cofins_pCOFINS': cofins_pCOFINS,
                 'cofins_vCOFINS': cofins_vCOFINS,
+                'cofins_qBCProd': cofins_qBCProd,
+                'cofins_vAliqProd': cofins_vAliqProd,
                 # Totals
                 'total_vBC': vBC,
                 'total_vICMS': vICMS,
