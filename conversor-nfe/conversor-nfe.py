@@ -5,7 +5,7 @@ import csv
 import sys, traceback
 import xml.etree.ElementTree as ET
 
-DECIMAL_DIGITS = 2
+DIGITS = 2
 
 def process_nfes(local):
     '''
@@ -91,6 +91,7 @@ def _parse_xml(path):
         vTotTrib = ICMSTot.find('ns:vTotTrib', ns).text
 
         get_optional = lambda v: v.text if v is not None else None
+        round_optional = lambda v: str(round(float(v.text), DIGITS)) if v is not None else None
 
         nfes = []
             
@@ -113,9 +114,9 @@ def _parse_xml(path):
             cEANTrib = get_optional(prod.find('ns:cEANTrib', ns))
             cProdANVISA = get_optional(prod.find('ns:med/ns:cProdANVISA', ns))
 
-            qCom = str(round(float(qCom), DECIMAL_DIGITS))
-            vUnCom = str(round(float(vUnCom), DECIMAL_DIGITS))
-            vProd = str(round(float(vProd), DECIMAL_DIGITS))
+            qCom = str(round(float(qCom), DIGITS))
+            vUnCom = str(round(float(vUnCom), DIGITS))
+            vProd = str(round(float(vProd), DIGITS))
 
             # Processing attributes of imposto
             imposto = det.find('ns:imposto', ns)
@@ -133,20 +134,24 @@ def _parse_xml(path):
             icms_vICMSSTRet = get_optional(inner_icms.find('ns:vICMSSTRet', ns))
 
             # Imposto PIS
-            pis = imposto.find('ns:PIS/ns:PISAliq', ns)
+            pis = imposto.find('ns:PIS', ns).findall('*')
+            if len(pis) > 1: raise Exception('Múltiplos campos dentro de PIS')
+            pis = pis[0]
 
             pis_CST = pis.find('ns:CST', ns).text
-            pis_vBC = str(round(float(pis.find('ns:vBC', ns).text), DECIMAL_DIGITS))
-            pis_pPIS = str(round(float(pis.find('ns:pPIS', ns).text), DECIMAL_DIGITS))
-            pis_vPIS = str(round(float(pis.find('ns:vPIS', ns).text), DECIMAL_DIGITS))
+            pis_vBC = round_optional(pis.find('ns:vBC', ns))
+            pis_pPIS = round_optional(pis.find('ns:pPIS', ns))
+            pis_vPIS = round_optional(pis.find('ns:vPIS', ns))
 
             # Imposto COFINS
-            cofins = imposto.find('ns:COFINS/ns:COFINSAliq', ns)
+            cofins = imposto.find('ns:COFINS', ns).findall('*')
+            if len(cofins) > 1: raise Exception('Múltiplos campos dentro de ICMS')
+            cofins = cofins[0]
 
             cofins_CST = cofins.find('ns:CST', ns).text
-            cofins_vBC = str(round(float(cofins.find('ns:vBC', ns).text), DECIMAL_DIGITS))
-            cofins_pCOFINS = str(round(float(cofins.find('ns:pCOFINS', ns).text), DECIMAL_DIGITS))
-            cofins_vCOFINS = str(round(float(cofins.find('ns:vCOFINS', ns).text), DECIMAL_DIGITS))
+            cofins_vBC = round_optional(cofins.find('ns:vBC', ns))
+            cofins_pCOFINS = round_optional(cofins.find('ns:pCOFINS', ns))
+            cofins_vCOFINS = round_optional(cofins.find('ns:vCOFINS', ns))
 
             nfe = {
                 'caminho': path,
