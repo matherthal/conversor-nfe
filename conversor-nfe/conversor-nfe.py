@@ -5,6 +5,8 @@ import csv
 import sys, traceback
 import xml.etree.ElementTree as ET
 
+DECIMAL_DIGITS = 2
+
 def process_nfes(local):
     '''
     Fetch xml NFe files recursively in current directory, parse the files
@@ -13,9 +15,11 @@ def process_nfes(local):
     parsed = [_parse_xml(f) for f in _fetch_xml_files(local)]
 
     with open('output.tsv', mode='w') as csv_file:
-        fieldnames = ['caminho', 'xNome', 'nNF', 'cProd', 'cEAN', 'xProd', 'NCM', 'cEANTrib', 
+        fieldnames = ['xNome', 'nNF', 'cProd', 'cEAN', 'xProd', 'NCM', 'cEANTrib', 
                       'CEST', 'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vTotTrib', 
-                      'orig', 'CST', 'vBCSTRet', 'pST', 'vICMSSTRet']
+                      'icms_orig', 'icms_CST', 'icms_vBCSTRet', 'icms_pST', 'icms_vICMSSTRet', 
+                      'pis_CST', 'pis_vBC', 'pis_pPIS', 'pis_vPIS', 
+                      'cofins_CST', 'cofins_vBC', 'cofins_pCOFINS', 'cofins_vCOFINS', 'caminho']
         
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter='\t')
         writer.writeheader()
@@ -78,23 +82,40 @@ def _parse_xml(path):
             cEANTrib = get_optional(prod.find('ns:cEANTrib', ns))
             cProdANVISA = get_optional(prod.find('ns:med/ns:cProdANVISA', ns))
 
-            qCom = str(round(float(qCom), 2))
-            vUnCom = str(round(float(vUnCom), 2))
-            vProd = str(round(float(vProd), 2))
+            qCom = str(round(float(qCom), DECIMAL_DIGITS))
+            vUnCom = str(round(float(vUnCom), DECIMAL_DIGITS))
+            vProd = str(round(float(vProd), DECIMAL_DIGITS))
 
             # Processing attributes of imposto
             imposto = det.find('ns:imposto', ns)
             vTotTrib = get_optional(imposto.find('ns:vTotTrib', ns))
             
+            # Imposto ICMS
             inner_icms = imposto.find('ns:ICMS', ns).findall('*')
             if len(inner_icms) > 1: raise Exception('Múltiplos campos dentro de ICMS')
             inner_icms = inner_icms[0]
 
-            orig = inner_icms.find('ns:orig', ns).text
-            CST = get_optional(inner_icms.find('ns:CST', ns))
-            vBCSTRet = get_optional(inner_icms.find('ns:vBCSTRet', ns))
-            pST = get_optional(inner_icms.find('ns:pST', ns))
-            vICMSSTRet = get_optional(inner_icms.find('ns:vICMSSTRet', ns))
+            icms_orig = inner_icms.find('ns:orig', ns).text
+            icms_CST = get_optional(inner_icms.find('ns:CST', ns))
+            icms_vBCSTRet = get_optional(inner_icms.find('ns:vBCSTRet', ns))
+            icms_pST = get_optional(inner_icms.find('ns:pST', ns))
+            icms_vICMSSTRet = get_optional(inner_icms.find('ns:vICMSSTRet', ns))
+
+            # Imposto PIS
+            pis = imposto.find('ns:PIS/ns:PISAliq', ns)
+
+            pis_CST = pis.find('ns:CST', ns).text
+            pis_vBC = str(round(float(pis.find('ns:vBC', ns).text), DECIMAL_DIGITS))
+            pis_pPIS = str(round(float(pis.find('ns:pPIS', ns).text), DECIMAL_DIGITS))
+            pis_vPIS = str(round(float(pis.find('ns:vPIS', ns).text), DECIMAL_DIGITS))
+
+            # Imposto COFINS
+            cofins = imposto.find('ns:COFINS/ns:COFINSAliq', ns)
+
+            cofins_CST = cofins.find('ns:CST', ns).text
+            cofins_vBC = str(round(float(cofins.find('ns:vBC', ns).text), DECIMAL_DIGITS))
+            cofins_pCOFINS = str(round(float(cofins.find('ns:pCOFINS', ns).text), DECIMAL_DIGITS))
+            cofins_vCOFINS = str(round(float(cofins.find('ns:vCOFINS', ns).text), DECIMAL_DIGITS))
 
             nfe = {
                 'caminho': path,
@@ -115,11 +136,22 @@ def _parse_xml(path):
                 'vProd': vProd,
                 # Imposto
                 'vTotTrib': vTotTrib,
-                'orig': orig,
-                'CST': CST,
-                'vBCSTRet': vBCSTRet,
-                'pST': pST,
-                'vICMSSTRet': vICMSSTRet,
+                # Imposto ICMS
+                'icms_orig': icms_orig,
+                'icms_CST': icms_CST,
+                'icms_vBCSTRet': icms_vBCSTRet,
+                'icms_pST': icms_pST,
+                'icms_vICMSSTRet': icms_vICMSSTRet,
+                # Imposto PIS
+                'pis_CST': pis_CST,
+                'pis_vBC': pis_vBC,
+                'pis_pPIS': pis_pPIS,
+                'pis_vPIS': pis_vPIS,
+                # Imposto COFINS
+                'cofins_CST': cofins_CST,
+                'cofins_vBC': cofins_vBC,
+                'cofins_pCOFINS': cofins_pCOFINS,
+                'cofins_vCOFINS': cofins_vCOFINS
             }
             
             nfes.append(nfe)
