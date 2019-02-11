@@ -19,7 +19,13 @@ def process_nfes(local):
                       'CEST', 'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vTotTrib', 
                       'icms_orig', 'icms_CST', 'icms_vBCSTRet', 'icms_pST', 'icms_vICMSSTRet', 
                       'pis_CST', 'pis_vBC', 'pis_pPIS', 'pis_vPIS', 
-                      'cofins_CST', 'cofins_vBC', 'cofins_pCOFINS', 'cofins_vCOFINS', 'caminho']
+                      'cofins_CST', 'cofins_vBC', 'cofins_pCOFINS', 'cofins_vCOFINS', 
+                      'total_vBC', 'total_vICMS', 'total_vICMSDeson', 'total_vFCPUFDest', 
+                      'total_vICMSUFDest', 'total_vICMSUFRemet', 'total_vFCP', 'total_vBCST', 
+                      'total_vST', 'total_vFCPST', 'total_vFCPSTRet', 'total_vProd', 
+                      'total_vFrete', 'total_vSeg', 'total_vDesc', 'total_vII', 'total_vIPI', 
+                      'total_vIPIDevol', 'total_vPIS', 'total_vCOFINS', 'total_vOutro', 
+                      'total_vNF', 'total_vTotTrib', 'caminho']
         
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter='\t')
         writer.writeheader()
@@ -52,14 +58,39 @@ def _parse_xml(path):
         root = ET.parse(path)
 
         ns = {'ns': 'http://www.portalfiscal.inf.br/nfe'} 
-        inf = root.find('ns:NFe/ns:infNFe', ns)              
+        inf = root.find('ns:NFe/ns:infNFe', ns)        
+        if inf is None:
+            return None
+
         emit = inf.find('ns:emit', ns)
         nNF = inf.find('ns:ide/ns:nNF', ns).text
 
-        get_optional = lambda v: v.text if v is not None else None
+        ICMSTot = inf.find('ns:total/ns:ICMSTot', ns)
+        vBC = ICMSTot.find('ns:vBC', ns).text
+        vICMS = ICMSTot.find('ns:vICMS', ns).text
+        vICMSDeson = ICMSTot.find('ns:vICMSDeson', ns).text
+        vFCPUFDest = ICMSTot.find('ns:vFCPUFDest', ns).text
+        vICMSUFDest = ICMSTot.find('ns:vICMSUFDest', ns).text
+        vICMSUFRemet = ICMSTot.find('ns:vICMSUFRemet', ns).text
+        vFCP = ICMSTot.find('ns:vFCP', ns).text
+        vBCST = ICMSTot.find('ns:vBCST', ns).text
+        vST = ICMSTot.find('ns:vST', ns).text
+        vFCPST = ICMSTot.find('ns:vFCPST', ns).text
+        vFCPSTRet = ICMSTot.find('ns:vFCPSTRet', ns).text
+        vProd = ICMSTot.find('ns:vProd', ns).text
+        vFrete = ICMSTot.find('ns:vFrete', ns).text
+        vSeg = ICMSTot.find('ns:vSeg', ns).text
+        vDesc = ICMSTot.find('ns:vDesc', ns).text
+        vII = ICMSTot.find('ns:vII', ns).text
+        vIPI = ICMSTot.find('ns:vIPI', ns).text
+        vIPIDevol = ICMSTot.find('ns:vIPIDevol', ns).text
+        vPIS = ICMSTot.find('ns:vPIS', ns).text
+        vCOFINS = ICMSTot.find('ns:vCOFINS', ns).text
+        vOutro = ICMSTot.find('ns:vOutro', ns).text
+        vNF = ICMSTot.find('ns:vNF', ns).text
+        vTotTrib = ICMSTot.find('ns:vTotTrib', ns).text
 
-        if inf is None:
-            return None
+        get_optional = lambda v: v.text if v is not None else None
 
         nfes = []
             
@@ -151,7 +182,31 @@ def _parse_xml(path):
                 'cofins_CST': cofins_CST,
                 'cofins_vBC': cofins_vBC,
                 'cofins_pCOFINS': cofins_pCOFINS,
-                'cofins_vCOFINS': cofins_vCOFINS
+                'cofins_vCOFINS': cofins_vCOFINS,
+                # Totals
+                'total_vBC': vBC,
+                'total_vICMS': vICMS,
+                'total_vICMSDeson': vICMSDeson,
+                'total_vFCPUFDest': vFCPUFDest,
+                'total_vICMSUFDest': vICMSUFDest,
+                'total_vICMSUFRemet': vICMSUFRemet,
+                'total_vFCP': vFCP,
+                'total_vBCST': vBCST,
+                'total_vST': vST,
+                'total_vFCPST': vFCPST,
+                'total_vFCPSTRet': vFCPSTRet,
+                'total_vProd': vProd,
+                'total_vFrete': vFrete,
+                'total_vSeg': vSeg,
+                'total_vDesc': vDesc,
+                'total_vII': vII,
+                'total_vIPI': vIPI,
+                'total_vIPIDevol': vIPIDevol,
+                'total_vPIS': vPIS,
+                'total_vCOFINS': vCOFINS,
+                'total_vOutro': vOutro,
+                'total_vNF': vNF,
+                'total_vTotTrib': vTotTrib
             }
             
             nfes.append(nfe)
