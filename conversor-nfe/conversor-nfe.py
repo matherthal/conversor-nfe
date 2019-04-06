@@ -32,27 +32,43 @@ def process_nfes(local):
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter='\t')
         writer.writeheader()
         
+        count = 0
         for nfes in parsed:
+            if nfes is None:
+                continue
+            
+            count += 1
             for nfe in nfes:
                 if nfe is not None:
                     writer.writerow(nfe)
     
     print('Aplicação executou com sucesso!')
+    print(f'FORAM PROCESSADOS {count} DOCUMENTOS')
 
 def _fetch_xml_files(path):
     '''
     Recursive search for .xml files
-    '''
+    ''' 
     paths = []
+
     for (dirpath, dirnames, filenames) in os.walk(path):
         for f in filenames:
-            if f.endswith('.xml'):
+            if f.lower().endswith('.xml'):
                 fpath = os.path.join(dirpath, f)
                 print(fpath)
                 paths.append(fpath)
+            else:
+                print(f"O arquivo {f} não é um XML")
+
+    if paths == [] and os.path.isfile(path) and path.lower().endswith('.xml'):
+        paths.append(path)
+    
     return paths
 
 def _parse_xml(path):
+    get_optional = lambda v: v.text if v is not None else None
+    round_optional = lambda v: str(round(float(v.text), DIGITS)) if v is not None else None
+
     '''
     Receives a path for a xml NFe file and parses the relevant data
     '''
@@ -62,6 +78,7 @@ def _parse_xml(path):
         ns = {'ns': 'http://www.portalfiscal.inf.br/nfe'} 
         inf = root.find('ns:NFe/ns:infNFe', ns)        
         if inf is None:
+            print(f"ATENÇÃO! O documento '{path}' não é válido e será ignorado!")
             return None
 
         emit = inf.find('ns:emit', ns)
@@ -71,9 +88,9 @@ def _parse_xml(path):
         vBC = ICMSTot.find('ns:vBC', ns).text
         vICMS = ICMSTot.find('ns:vICMS', ns).text
         vICMSDeson = ICMSTot.find('ns:vICMSDeson', ns).text
-        vFCPUFDest = ICMSTot.find('ns:vFCPUFDest', ns).text
-        vICMSUFDest = ICMSTot.find('ns:vICMSUFDest', ns).text
-        vICMSUFRemet = ICMSTot.find('ns:vICMSUFRemet', ns).text
+        vFCPUFDest = get_optional(ICMSTot.find('ns:vFCPUFDest', ns))
+        vICMSUFDest = get_optional(ICMSTot.find('ns:vICMSUFDest', ns))
+        vICMSUFRemet = get_optional(ICMSTot.find('ns:vICMSUFRemet', ns))
         vFCP = ICMSTot.find('ns:vFCP', ns).text
         vBCST = ICMSTot.find('ns:vBCST', ns).text
         vST = ICMSTot.find('ns:vST', ns).text
@@ -90,10 +107,7 @@ def _parse_xml(path):
         vCOFINS = ICMSTot.find('ns:vCOFINS', ns).text
         vOutro = ICMSTot.find('ns:vOutro', ns).text
         vNF = ICMSTot.find('ns:vNF', ns).text
-        vTotTrib = ICMSTot.find('ns:vTotTrib', ns).text
-
-        get_optional = lambda v: v.text if v is not None else None
-        round_optional = lambda v: str(round(float(v.text), DIGITS)) if v is not None else None
+        vTotTrib = get_optional(ICMSTot.find('ns:vTotTrib', ns))
 
         nfes = []
             
