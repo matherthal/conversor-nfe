@@ -14,7 +14,7 @@ def process_nfes(local):
     '''
     parsed = [_parse_xml(f) for f in _fetch_xml_files(local)]
 
-    with open('output.tsv', mode='w') as csv_file:
+    with open('output.csv', mode='w') as csv_file:
         fieldnames = ['xNome', 'nNF', 'cProd', 'cEAN', 'xProd', 'NCM', 'cEANTrib', 
                       'CEST', 'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vTotTrib', 
                       'icms_orig', 'icms_CST', 'icms_vBCSTRet', 'icms_pST', 'icms_vICMSSTRet', 
@@ -29,7 +29,7 @@ def process_nfes(local):
                       'total_vIPIDevol', 'total_vPIS', 'total_vCOFINS', 'total_vOutro', 
                       'total_vNF', 'total_vTotTrib', 'caminho']
         
-        writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter='\t')
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter=';')
         writer.writeheader()
         
         count = 0
