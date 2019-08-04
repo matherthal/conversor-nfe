@@ -15,19 +15,25 @@ def process_nfes(local):
     parsed = [_parse_xml(f) for f in _fetch_xml_files(local)]
 
     with open('output.csv', mode='w') as csv_file:
-        fieldnames = ['xNome', 'nNF', 'cProd', 'cEAN', 'xProd', 'NCM', 'cEANTrib', 
-                      'CEST', 'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vTotTrib', 
-                      'icms_orig', 'icms_CST', 'icms_vBCSTRet', 'icms_pST', 'icms_vICMSSTRet', 
-                      'pis_CST', 'pis_vBC', 'pis_pPIS', 'pis_vPIS', 
-                      'pis_qBCProd', 'pis_vAliqProd', 
-                      'cofins_CST', 'cofins_vBC', 'cofins_pCOFINS', 'cofins_vCOFINS', 
-                      'cofins_qBCProd', 'cofins_vAliqProd', 
-                      'total_vBC', 'total_vICMS', 'total_vICMSDeson', 'total_vFCPUFDest', 
-                      'total_vICMSUFDest', 'total_vICMSUFRemet', 'total_vFCP', 'total_vBCST', 
-                      'total_vST', 'total_vFCPST', 'total_vFCPSTRet', 'total_vProd', 
-                      'total_vFrete', 'total_vSeg', 'total_vDesc', 'total_vII', 'total_vIPI', 
-                      'total_vIPIDevol', 'total_vPIS', 'total_vCOFINS', 'total_vOutro', 
-                      'total_vNF', 'total_vTotTrib', 'caminho']
+        fieldnames = [
+            'xNome', 'nNF', 'cProd', 'cEAN', 'xProd', 'NCM', 'cEANTrib', 
+            'CEST', 'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vTotTrib', 
+            'icms_orig', 'icms_CST', 'icms_vBCSTRet', 'icms_pST', 'icms_vICMSSTRet', 
+            'icms_modBC', 'icms_pRedBC', 'icms_vBC', 'icms_pICMS', 'icms_vICMS', 
+            'icms_vBCFCPP', 'icms_pFCP', 'icms_vFCP', 
+            'pis_CST', 'pis_vBC', 'pis_pPIS', 'pis_vPIS', 
+            'pis_qBCProd', 'pis_vAliqProd', 
+            'cofins_CST', 'cofins_vBC', 'cofins_pCOFINS', 'cofins_vCOFINS', 
+            'cofins_qBCProd', 'cofins_vAliqProd', 
+            'ICMSUFDest_vBCUFDest', 'ICMSUFDest_pFCPUFDest', 'ICMSUFDest_pICMSUFDest', 
+            'ICMSUFDest_pICMSInter', 'ICMSUFDest_pICMSInterPart', 'ICMSUFDest_vFCPUFDest', 
+            'ICMSUFDest_vICMSUFDest', 'ICMSUFDest_vICMSUFRemet', 
+            'total_vBC', 'total_vICMS', 'total_vICMSDeson', 'total_vFCPUFDest', 
+            'total_vICMSUFDest', 'total_vICMSUFRemet', 'total_vFCP', 'total_vBCST', 
+            'total_vST', 'total_vFCPST', 'total_vFCPSTRet', 'total_vProd', 
+            'total_vFrete', 'total_vSeg', 'total_vDesc', 'total_vII', 'total_vIPI', 
+            'total_vIPIDevol', 'total_vPIS', 'total_vCOFINS', 'total_vOutro', 
+            'total_vNF', 'total_vTotTrib', 'caminho']
         
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter=';')
         writer.writeheader()
@@ -110,49 +116,62 @@ def _parse_xml(path):
         vTotTrib = get_optional(ICMSTot.find('ns:vTotTrib', ns))
 
         nfes = []
-            
+        
         for det in inf.findall('ns:det', ns):
-            xNome = emit.find('ns:xNome', ns).text
+            nfe = {
+                'caminho': path
+            }
+            
+            nfe['xNome'] = emit.find('ns:xNome', ns).text
             
             # Processing attributes of prod
-            prod = det.find('ns:prod', ns)
+            nfe['prod'] = det.find('ns:prod', ns)
 
-            cProd = prod.find('ns:cProd', ns).text
-            cEAN = get_optional(prod.find('ns:cEAN', ns))
-            xProd = prod.find('ns:xProd', ns).text
-            NCM = prod.find('ns:NCM', ns).text
-            CEST = get_optional(prod.find('ns:CEST', ns))
-            CFOP = prod.find('ns:CFOP', ns).text
-            uCom = prod.find('ns:uCom', ns).text
-            qCom = prod.find('ns:qCom', ns).text
-            vUnCom = prod.find('ns:vUnCom', ns).text
-            vProd = prod.find('ns:vProd', ns).text
-            cEANTrib = get_optional(prod.find('ns:cEANTrib', ns))
-            cProdANVISA = get_optional(prod.find('ns:med/ns:cProdANVISA', ns))
+            nfe['cProd'] = prod.find('ns:cProd', ns).text
+            nfe['cEAN'] = get_optional(prod.find('ns:cEAN', ns))
+            nfe['xProd'] = prod.find('ns:xProd', ns).text
+            nfe['NCM'] = prod.find('ns:NCM', ns).text
+            nfe['CEST'] = get_optional(prod.find('ns:CEST', ns))
+            nfe['CFOP'] = prod.find('ns:CFOP', ns).text
+            nfe['uCom'] = prod.find('ns:uCom', ns).text
+            nfe['qCom'] = prod.find('ns:qCom', ns).text
+            nfe['vUnCom'] = prod.find('ns:vUnCom', ns).text
+            nfe['vProd'] = prod.find('ns:vProd', ns).text
+            nfe['cEANTrib'] = get_optional(prod.find('ns:cEANTrib', ns))
+            nfe['cProdANVISA'] = get_optional(prod.find('ns:med/ns:cProdANVISA', ns))
 
-            qCom = str(round(float(qCom), DIGITS))
-            vUnCom = str(round(float(vUnCom), DIGITS))
-            vProd = str(round(float(vProd), DIGITS))
+            nfe['qCom'] = str(round(float(qCom), DIGITS))
+            nfe['vUnCom'] = str(round(float(vUnCom), DIGITS))
+            nfe['vProd'] = str(round(float(vProd), DIGITS))
 
             # Processing attributes of imposto
-            imposto = det.find('ns:imposto', ns)
-            vTotTrib = get_optional(imposto.find('ns:vTotTrib', ns))
+            nfe['imposto'] = det.find('ns:imposto', ns)
+            nfe['vTotTrib'] = get_optional(imposto.find('ns:vTotTrib', ns))
             
             # Imposto ICMS
             inner_icms = imposto.find('ns:ICMS', ns).findall('*')
             if len(inner_icms) > 1: raise Exception('Múltiplos campos dentro de ICMS')
-            inner_icms = inner_icms[0]
+            nfe['inner_icms'] = inner_icms[0]
 
-            icms_orig = inner_icms.find('ns:orig', ns).text
-            icms_CST = get_optional(inner_icms.find('ns:CST', ns))
-            icms_vBCSTRet = get_optional(inner_icms.find('ns:vBCSTRet', ns))
-            icms_pST = get_optional(inner_icms.find('ns:pST', ns))
-            icms_vICMSSTRet = get_optional(inner_icms.find('ns:vICMSSTRet', ns))
-
+            nfe['icms_orig'] = inner_icms.find('ns:orig', ns).text
+            nfe['icms_CST'] = get_optional(inner_icms.find('ns:CST', ns))
+            nfe['icms_vBCSTRet'] = get_optional(inner_icms.find('ns:vBCSTRet', ns))
+            nfe['icms_pST'] = get_optional(inner_icms.find('ns:pST', ns))
+            nfe['icms_vICMSSTRet'] = get_optional(inner_icms.find('ns:vICMSSTRet', ns))
+            
+            nfe['icms_modBC'] = get_optional(inner_icms.find('ns:modBC', ns))
+            nfe['icms_pRedBC'] = round_optional(inner_icms.find('ns:pRedBC', ns))
+            nfe['icms_vBC'] = round_optional(inner_icms.find('ns:vBC', ns))
+            nfe['icms_pICMS'] = round_optional(inner_icms.find('ns:pICMS', ns))
+            nfe['icms_vICMS'] = round_optional(inner_icms.find('ns:vICMS', ns))
+            nfe['icms_vBCFCPP'] = round_optional(inner_icms.find('ns:vBCFCPP', ns))
+            nfe['icms_pFCP'] = round_optional(inner_icms.find('ns:pFCP', ns))
+            nfe['icms_vFCP'] = round_optional(inner_icms.find('ns:vFCP', ns))
+            
             # Imposto PIS
             pis = imposto.find('ns:PIS', ns).findall('*')
             if len(pis) > 1: raise Exception('Múltiplos campos dentro de PIS')
-            pis = pis[0]
+            nfe['pis'] = pis[0]
             
             tags = ['CST', 'vBC', 'pPIS', 'vPIS', 'qBCProd', 'vAliqProd']
             for c in pis.findall('*'):
@@ -160,17 +179,17 @@ def _parse_xml(path):
                 if tag not in tags:
                     raise Exception('Campos desconhecidos em PIS: ' + tag)
             
-            pis_CST = pis.find('ns:CST', ns).text
-            pis_vBC = round_optional(pis.find('ns:vBC', ns))
-            pis_pPIS = round_optional(pis.find('ns:pPIS', ns))
-            pis_vPIS = round_optional(pis.find('ns:vPIS', ns))
-            pis_qBCProd = round_optional(pis.find('ns:qBCProd', ns))
-            pis_vAliqProd = round_optional(pis.find('ns:vAliqProd', ns))
+            nfe['pis_CST'] = pis.find('ns:CST', ns).text
+            nfe['pis_vBC'] = round_optional(pis.find('ns:vBC', ns))
+            nfe['pis_pPIS'] = round_optional(pis.find('ns:pPIS', ns))
+            nfe['pis_vPIS'] = round_optional(pis.find('ns:vPIS', ns))
+            nfe['pis_qBCProd'] = round_optional(pis.find('ns:qBCProd', ns))
+            nfe['pis_vAliqProd'] = round_optional(pis.find('ns:vAliqProd', ns))
 
             # Imposto COFINS
             cofins = imposto.find('ns:COFINS', ns).findall('*')
             if len(cofins) > 1: raise Exception('Múltiplos campos dentro de COFINS')
-            cofins = cofins[0]
+            nfe['cofins'] = cofins[0]
 
             tags = ['CST', 'vBC', 'pCOFINS', 'vCOFINS', 'qBCProd', 'vAliqProd']
             for c in cofins.findall('*'):
@@ -178,77 +197,23 @@ def _parse_xml(path):
                 if tag not in tags:
                     raise Exception('Campos desconhecidos em COFINS: ' + tag)
 
-            cofins_CST = cofins.find('ns:CST', ns).text
-            cofins_vBC = round_optional(cofins.find('ns:vBC', ns))
-            cofins_pCOFINS = round_optional(cofins.find('ns:pCOFINS', ns))
-            cofins_vCOFINS = round_optional(cofins.find('ns:vCOFINS', ns))
-            cofins_qBCProd = round_optional(cofins.find('ns:qBCProd', ns))
-            cofins_vAliqProd = round_optional(cofins.find('ns:vAliqProd', ns))
+            nfe['cofins_CST'] = cofins.find('ns:CST', ns).text
+            nfe['cofins_vBC'] = round_optional(cofins.find('ns:vBC', ns))
+            nfe['cofins_pCOFINS'] = round_optional(cofins.find('ns:pCOFINS', ns))
+            nfe['cofins_vCOFINS'] = round_optional(cofins.find('ns:vCOFINS', ns))
+            nfe['cofins_qBCProd'] = round_optional(cofins.find('ns:qBCProd', ns))
+            nfe['cofins_vAliqProd'] = round_optional(cofins.find('ns:vAliqProd', ns))
 
-            nfe = {
-                'caminho': path,
-                'xNome': xNome,
-                'nNF': nNF,
-                # Produto
-                'cProd': cProd,
-                'cEAN': cEAN,
-                'xProd': xProd,
-                'NCM': NCM,
-                'cEANTrib': cEANTrib,
-                'CEST': CEST,
-                'cProdANVISA': cProdANVISA,
-                'CFOP': CFOP,
-                'uCom': uCom,
-                'qCom': qCom,
-                'vUnCom': vUnCom,
-                'vProd': vProd,
-                # Imposto
-                'vTotTrib': vTotTrib,
-                # Imposto ICMS
-                'icms_orig': icms_orig,
-                'icms_CST': icms_CST,
-                'icms_vBCSTRet': icms_vBCSTRet,
-                'icms_pST': icms_pST,
-                'icms_vICMSSTRet': icms_vICMSSTRet,
-                # Imposto PIS
-                'pis_CST': pis_CST,
-                'pis_vBC': pis_vBC,
-                'pis_pPIS': pis_pPIS,
-                'pis_vPIS': pis_vPIS,
-                'pis_qBCProd': pis_qBCProd,
-                'pis_vAliqProd': pis_vAliqProd,
-                # Imposto COFINS
-                'cofins_CST': cofins_CST,
-                'cofins_vBC': cofins_vBC,
-                'cofins_pCOFINS': cofins_pCOFINS,
-                'cofins_vCOFINS': cofins_vCOFINS,
-                'cofins_qBCProd': cofins_qBCProd,
-                'cofins_vAliqProd': cofins_vAliqProd,
-                # Totals
-                'total_vBC': vBC,
-                'total_vICMS': vICMS,
-                'total_vICMSDeson': vICMSDeson,
-                'total_vFCPUFDest': vFCPUFDest,
-                'total_vICMSUFDest': vICMSUFDest,
-                'total_vICMSUFRemet': vICMSUFRemet,
-                'total_vFCP': vFCP,
-                'total_vBCST': vBCST,
-                'total_vST': vST,
-                'total_vFCPST': vFCPST,
-                'total_vFCPSTRet': vFCPSTRet,
-                'total_vProd': vProd,
-                'total_vFrete': vFrete,
-                'total_vSeg': vSeg,
-                'total_vDesc': vDesc,
-                'total_vII': vII,
-                'total_vIPI': vIPI,
-                'total_vIPIDevol': vIPIDevol,
-                'total_vPIS': vPIS,
-                'total_vCOFINS': vCOFINS,
-                'total_vOutro': vOutro,
-                'total_vNF': vNF,
-                'total_vTotTrib': vTotTrib
-            }
+            # Imposto ICMSUFDest
+            icmsufdest = imposto.find('ns:ICMSUFDest', ns)
+            nfe['ICMSUFDest_vBCUFDest'] = round_optional(icmsufdest.find('ns:vBCUFDest', ns))
+            nfe['ICMSUFDest_pFCPUFDest'] = round_optional(icmsufdest.find('ns:pFCPUFDest', ns))
+            nfe['ICMSUFDest_pICMSUFDest'] = round_optional(icmsufdest.find('ns:pICMSUFDest', ns))
+            nfe['ICMSUFDest_pICMSInter'] = round_optional(icmsufdest.find('ns:pICMSInter', ns))
+            nfe['ICMSUFDest_pICMSInterPart'] = round_optional(icmsufdest.find('ns:pICMSInterPart', ns))
+            nfe['ICMSUFDest_vFCPUFDest'] = round_optional(icmsufdest.find('ns:vFCPUFDest', ns))
+            nfe['ICMSUFDest_vICMSUFDest'] = round_optional(icmsufdest.find('ns:vICMSUFDest', ns))
+            nfe['ICMSUFDest_vICMSUFRemet'] = round_optional(icmsufdest.find('ns:vICMSUFRemet', ns))
             
             nfes.append(nfe)
                 
