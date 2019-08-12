@@ -3,45 +3,49 @@
 import os
 import csv
 import sys, traceback
-# import re
 import xml.etree.ElementTree as ET
 
-DIGITS = 2
+DIGITS=2
 
-get_optional = lambda v: v.text if v is not None else None
-text_optional = lambda v: '\'' + v.text if v is not None else None
-round_optional = lambda v: str(round(float(v.text), DIGITS)) if v is not None else None
+def get_optional(v): 
+    '''Get attribute text if the object is not None
+    '''
+    if v is not None:
+        return v.text
+    else: 
+        return None
 
-# def round_if_float(value):
-#     if value:
-#         if re.match(r'[0-9]+.[0-9]+', value.text):
-#             return round_optional(value)
-#         else:
-#             return value.text
-#     else:
-#         return None
+def round_optional(v, digits=2): 
+    '''If value is not None then round it to number of digits and convert it to string 
+    '''
+    if v is not None:
+        return str(round(float(v.text), digits)) 
+    else:
+        return None
 
 def process_nfes(local):
-    '''
-    Fetch xml NFe files recursively in current directory, parse the files
+    '''Fetch xml NFe files recursively in current directory, parse the files
     extracting the relevant information and write the output to a csv file
     '''
     parsed = [_parse_xml(f) for f in _fetch_xml_files(local)]
 
     with open('output.csv', mode='w') as csv_file:
         fieldnames = [
-            'xNome', 'nNF', 'cProd', 'xProd', 'NCM', 'cEAN', 'cEANTrib', 
+            'xNome', 'nNF', 'cProd', 'xProd', 'emitUF', 'destUF',
+            'NCM', 'cEAN', 'cEANTrib', 
             'CEST', 'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vTotTrib', 
             'ICMS_orig', 'ICMS_CST', 'ICMS_vBCSTRet', 'ICMS_pST', 'ICMS_vICMSSTRet', 
             'ICMS_modBC', 'ICMS_pRedBC', 'ICMS_vBC', 'ICMS_pICMS', 'ICMS_vICMS', 
             'ICMS_vBCFCPP', 'ICMS_pFCP', 'ICMS_vFCP', 
+            'ICMS_modBCST', 'ICMS_pMVAST', 'ICMS_vBCST', 'ICMS_pICMSST', 'ICMS_vICMSST', 
+            'ICMS_vBCFCPST', 'ICMS_pFCPST', 'ICMS_vFCPST',
             'PIS_CST', 'PIS_vBC', 'PIS_pPIS', 'PIS_vPIS', 
             'PIS_qBCProd', 'PIS_vAliqProd', 
             'COFINS_CST', 'COFINS_vBC', 'COFINS_pCOFINS', 'COFINS_vCOFINS', 
             'COFINS_qBCProd', 'COFINS_vAliqProd', 
             'ICMSUFDest_vBCUFDest', 'ICMSUFDest_pFCPUFDest', 'ICMSUFDest_pICMSUFDest', 
             'ICMSUFDest_pICMSInter', 'ICMSUFDest_pICMSInterPart', 'ICMSUFDest_vFCPUFDest', 
-            'ICMSUFDest_vICMSUFDest', 'ICMSUFDest_vICMSUFRemet', 'IPI_cEnq', 'IPI_CST',
+            'ICMSUFDest_vICMSUFDest', 'ICMSUFDest_vICMSUFRemet', 'IPI_cEnq', 'IPI_CST', 
             'TOTAL_ICMS_vBC', 'TOTAL_vICMS', 'TOTAL_vICMSDeson', 'TOTAL_vFCPUFDest', 
             'TOTAL_vICMSUFDest', 'TOTAL_vICMSUFRemet', 'TOTAL_vFCP', 'TOTAL_vBCST', 
             'TOTAL_vST', 'TOTAL_vFCPST', 'TOTAL_vFCPSTRet', 'TOTAL_vProd', 
@@ -67,8 +71,7 @@ def process_nfes(local):
     print(f'FORAM PROCESSADOS {count} DOCUMENTOS')
 
 def _fetch_xml_files(path):
-    '''
-    Recursive search for .xml files
+    '''Recursive search for .xml files
     ''' 
     paths = []
 
@@ -87,8 +90,7 @@ def _fetch_xml_files(path):
     return paths
 
 def _parse_xml(path):
-    '''
-    Receives a path for a xml NFe file and parses the relevant data
+    '''Receives a path for a xml NFe file and parses the relevant data
     '''
     try:
         root = ET.parse(path)
@@ -104,7 +106,7 @@ def _parse_xml(path):
         emit = inf.find('ns:emit', ns)
         xNome = emit.find('ns:xNome', ns).text
         emitUF = emit.find('ns:enderEmit/ns:UF', ns).text
-        destUF = inf.find('ns:dest/ns:enderDest/ns:UF').text
+        destUF = inf.find('ns:dest/ns:enderDest/ns:UF', ns).text
 
         ICMSTot = inf.find('ns:total/ns:ICMSTot', ns)
         totals = {}
@@ -149,7 +151,7 @@ def _parse_xml(path):
             prod = det.find('ns:prod', ns)
 
             nfe['cProd'] = prod.find('ns:cProd', ns).text
-            nfe['cEAN'] = text_optional(prod.find('ns:cEAN', ns))
+            nfe['cEAN'] = get_optional(prod.find('ns:cEAN', ns))
             nfe['xProd'] = prod.find('ns:xProd', ns).text
             nfe['NCM'] = prod.find('ns:NCM', ns).text
             nfe['CEST'] = get_optional(prod.find('ns:CEST', ns))
@@ -159,7 +161,7 @@ def _parse_xml(path):
             nfe['vUnCom'] = prod.find('ns:vUnCom', ns).text
             nfe['vProd'] = prod.find('ns:vProd', ns).text
             nfe['cEANTrib'] = get_optional(prod.find('ns:cEANTrib', ns))
-            nfe['cProdANVISA'] = text_optional(prod.find('ns:med/ns:cProdANVISA', ns))
+            nfe['cProdANVISA'] = get_optional(prod.find('ns:med/ns:cProdANVISA', ns))
 
             nfe['qCom'] = str(round(float(nfe['qCom']), DIGITS))
             nfe['vUnCom'] = str(round(float(nfe['vUnCom']), DIGITS))
@@ -189,6 +191,16 @@ def _parse_xml(path):
             nfe['ICMS_pFCP'] = round_optional(inner_icms.find('ns:pFCP', ns))
             nfe['ICMS_vFCP'] = round_optional(inner_icms.find('ns:vFCP', ns))
             
+            # ICMS filds that may appear in ICMS70 and ICMS10
+            nfe['ICMS_modBCST'] = get_optional(inner_icms.find('ns:modBCST', ns))
+            nfe['ICMS_pMVAST'] = round_optional(inner_icms.find('ns:pMVAST', ns))
+            nfe['ICMS_vBCST'] = round_optional(inner_icms.find('ns:vBCST', ns))
+            nfe['ICMS_pICMSST'] = round_optional(inner_icms.find('ns:pICMSST', ns))
+            nfe['ICMS_vICMSST'] = round_optional(inner_icms.find('ns:vICMSST', ns))
+            nfe['ICMS_vBCFCPST'] = round_optional(inner_icms.find('ns:vBCFCPST', ns))
+            nfe['ICMS_pFCPST'] = round_optional(inner_icms.find('ns:pFCPST', ns))
+            nfe['ICMS_vFCPST'] = round_optional(inner_icms.find('ns:vFCPST', ns))
+
             # Imposto PIS
             pis = imposto.find('ns:PIS', ns).findall('*')
             if len(pis) > 1: raise Exception('Múltiplos campos dentro de PIS')
