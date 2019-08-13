@@ -33,7 +33,7 @@ def process_nfes(local):
         fieldnames = [
             'xNome', 'nNF', 'cProd', 'xProd', 'emitUF', 'destUF',
             'NCM', 'cEAN', 'cEANTrib', 
-            'CEST', 'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vTotTrib', 
+            'CEST', 'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vDesc', 'vTotTrib', 
             'ICMS_orig', 'ICMS_CST', 'ICMS_vBCSTRet', 'ICMS_pST', 'ICMS_vICMSSTRet', 
             'ICMS_modBC', 'ICMS_pRedBC', 'ICMS_vBC', 'ICMS_pICMS', 'ICMS_vICMS', 
             'ICMS_vBCFCPP', 'ICMS_pFCP', 'ICMS_vFCP', 
@@ -112,27 +112,27 @@ def _parse_xml(path):
         totals = {}
         totals['TOTAL_ICMS_vBC'] = ICMSTot.find('ns:vBC', ns).text
         totals['TOTAL_vICMS'] = ICMSTot.find('ns:vICMS', ns).text
-        totals['TOTAL_vICMSDeson'] = ICMSTot.find('ns:vICMSDeson', ns).text
-        totals['TOTAL_vFCPUFDest'] = get_optional(ICMSTot.find('ns:vFCPUFDest', ns))
-        totals['TOTAL_vICMSUFDest'] = get_optional(ICMSTot.find('ns:vICMSUFDest', ns))
-        totals['TOTAL_vICMSUFRemet'] = get_optional(ICMSTot.find('ns:vICMSUFRemet', ns))
-        totals['TOTAL_vFCP'] = ICMSTot.find('ns:vFCP', ns).text
-        totals['TOTAL_vBCST'] = ICMSTot.find('ns:vBCST', ns).text
-        totals['TOTAL_vST'] = ICMSTot.find('ns:vST', ns).text
-        totals['TOTAL_vFCPST'] = ICMSTot.find('ns:vFCPST', ns).text
-        totals['TOTAL_vFCPSTRet'] = ICMSTot.find('ns:vFCPSTRet', ns).text
-        totals['TOTAL_vProd'] = ICMSTot.find('ns:vProd', ns).text
-        totals['TOTAL_vFrete'] = ICMSTot.find('ns:vFrete', ns).text
-        totals['TOTAL_vSeg'] = ICMSTot.find('ns:vSeg', ns).text
-        totals['TOTAL_vDesc'] = ICMSTot.find('ns:vDesc', ns).text
-        totals['TOTAL_vII'] = ICMSTot.find('ns:vII', ns).text
-        totals['TOTAL_vIPI'] = ICMSTot.find('ns:vIPI', ns).text
-        totals['TOTAL_vIPIDevol'] = ICMSTot.find('ns:vIPIDevol', ns).text
-        totals['TOTAL_vPIS'] = ICMSTot.find('ns:vPIS', ns).text
-        totals['TOTAL_vCOFINS'] = ICMSTot.find('ns:vCOFINS', ns).text
-        totals['TOTAL_vOutro'] = ICMSTot.find('ns:vOutro', ns).text
-        totals['TOTAL_vNF'] = ICMSTot.find('ns:vNF', ns).text
-        totals['TOTAL_vTotTrib'] = get_optional(ICMSTot.find('ns:vTotTrib', ns))
+        totals['TOTAL_vICMSDeson'] = round_optional(ICMSTot.find('ns:vICMSDeson', ns))
+        totals['TOTAL_vFCPUFDest'] = round_optional(ICMSTot.find('ns:vFCPUFDest', ns))
+        totals['TOTAL_vICMSUFDest'] = round_optional(ICMSTot.find('ns:vICMSUFDest', ns))
+        totals['TOTAL_vICMSUFRemet'] = round_optional(ICMSTot.find('ns:vICMSUFRemet', ns))
+        totals['TOTAL_vFCP'] = round_optional(ICMSTot.find('ns:vFCP', ns))
+        totals['TOTAL_vBCST'] = round_optional(ICMSTot.find('ns:vBCST', ns))
+        totals['TOTAL_vST'] = round_optional(ICMSTot.find('ns:vST', ns))
+        totals['TOTAL_vFCPST'] = round_optional(ICMSTot.find('ns:vFCPST', ns))
+        totals['TOTAL_vFCPSTRet'] = round_optional(ICMSTot.find('ns:vFCPSTRet', ns))
+        totals['TOTAL_vProd'] = round_optional(ICMSTot.find('ns:vProd', ns))
+        totals['TOTAL_vFrete'] = round_optional(ICMSTot.find('ns:vFrete', ns))
+        totals['TOTAL_vSeg'] = round_optional(ICMSTot.find('ns:vSeg', ns))
+        totals['TOTAL_vDesc'] = round_optional(ICMSTot.find('ns:vDesc', ns))
+        totals['TOTAL_vII'] = round_optional(ICMSTot.find('ns:vII', ns))
+        totals['TOTAL_vIPI'] = round_optional(ICMSTot.find('ns:vIPI', ns))
+        totals['TOTAL_vIPIDevol'] = round_optional(ICMSTot.find('ns:vIPIDevol', ns))
+        totals['TOTAL_vPIS'] = round_optional(ICMSTot.find('ns:vPIS', ns))
+        totals['TOTAL_vCOFINS'] = round_optional(ICMSTot.find('ns:vCOFINS', ns))
+        totals['TOTAL_vOutro'] = round_optional(ICMSTot.find('ns:vOutro', ns))
+        totals['TOTAL_vNF'] = round_optional(ICMSTot.find('ns:vNF', ns))
+        totals['TOTAL_vTotTrib'] = round_optional(ICMSTot.find('ns:vTotTrib', ns))
 
         nfes = []
         
@@ -160,6 +160,7 @@ def _parse_xml(path):
             nfe['qCom'] = prod.find('ns:qCom', ns).text
             nfe['vUnCom'] = prod.find('ns:vUnCom', ns).text
             nfe['vProd'] = prod.find('ns:vProd', ns).text
+            nfe['vDesc'] = round_optional(prod.find('ns:vDesc', ns))
             nfe['cEANTrib'] = get_optional(prod.find('ns:cEANTrib', ns))
             nfe['cProdANVISA'] = get_optional(prod.find('ns:med/ns:cProdANVISA', ns))
 
