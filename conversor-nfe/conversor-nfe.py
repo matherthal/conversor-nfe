@@ -45,7 +45,9 @@ def process_nfes(local):
             'COFINS_qBCProd', 'COFINS_vAliqProd', 
             'ICMSUFDest_vBCUFDest', 'ICMSUFDest_pFCPUFDest', 'ICMSUFDest_pICMSUFDest', 
             'ICMSUFDest_pICMSInter', 'ICMSUFDest_pICMSInterPart', 'ICMSUFDest_vFCPUFDest', 
-            'ICMSUFDest_vICMSUFDest', 'ICMSUFDest_vICMSUFRemet', 'IPI_cEnq', 'IPI_CST', 
+            'ICMSUFDest_vICMSUFDest', 'ICMSUFDest_vICMSUFRemet', 
+            'IPI_cEnq', 'IPI_CST', 'IPI_vBC', 'IPI_pIPI', 'IPI_vIPI',
+            'IPI_qUnid', 'IPI_vUnid', 'IPI_vIPI', 
             'TOTAL_ICMS_vBC', 'TOTAL_vICMS', 'TOTAL_vICMSDeson', 'TOTAL_vFCPUFDest', 
             'TOTAL_vICMSUFDest', 'TOTAL_vICMSUFRemet', 'TOTAL_vFCP', 'TOTAL_vBCST', 
             'TOTAL_vST', 'TOTAL_vFCPST', 'TOTAL_vFCPSTRet', 'TOTAL_vProd', 
@@ -252,10 +254,27 @@ def _parse_xml(path):
             
             # Imposto IPI
             ipi = imposto.find('ns:IPI', ns)
-            if icmsufdest:
-                nfe['IPI_cEnq'] = round_optional(ipi.find('ns:cEnq', ns))
-                nfe['IPI_CST'] = ipi.find('ns:IPINT/ns:CST', ns).text
-            
+            if ipi:
+                nfe['IPI_cEnq'] = get_optional(ipi.find('ns:cEnq', ns))
+                
+                ipint = ipi.find('ns:IPINT', ns)
+                ipitrib = ipi.find('ns:IPITrib', ns)
+
+                #If IPI is "tributed" or not
+                if ipint:
+                    nfe['IPI_CST'] = ipint.find('ns:CST', ns).text
+                elif ipitrib:
+                    nfe['IPI_CST'] = get_optional(ipitrib.find('ns:CST', ns))
+                    
+                    #Some documents have vBC and pIPI others have qUnid and vUnid
+                    nfe['IPI_vBC'] = round_optional(ipitrib.find('ns:vBC', ns))
+                    nfe['IPI_pIPI'] = get_optional(ipitrib.find('ns:pIPI', ns))
+                    
+                    nfe['IPI_qUnid'] = get_optional(ipitrib.find('ns:qUnid', ns))
+                    nfe['IPI_vUnid'] = round_optional(ipitrib.find('ns:vUnid', ns))
+                    
+                    nfe['IPI_vIPI'] = get_optional(ipitrib.find('ns:vIPI', ns))
+                
             nfes.append(nfe)
                 
         return nfes
