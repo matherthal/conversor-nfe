@@ -31,10 +31,10 @@ def process_nfes(local):
 
     with open('output.csv', mode='w') as csv_file:
         fieldnames = [
-            'xNome', 'nNF', 'cProd', 'xProd', 'emitUF', 'destUF',
+            'emit_xNome', 'emit_UF', 'dest_xNome', 'dest_UF', 'nNF', 'cProd', 'xProd',
             'NCM', 'cEAN', 'cEANTrib', 
             'CEST', 'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vDesc', 'vTotTrib', 
-            'ICMS_orig', 'ICMS_CST', 'ICMS_vBCSTRet', 'ICMS_pST', 'ICMS_vICMSSTRet', 
+            'ICMS_orig', 'ICMS_CST', 'ICMS_CSOSN', 'ICMS_vBCSTRet', 'ICMS_pST', 'ICMS_vICMSSTRet', 
             'ICMS_modBC', 'ICMS_pRedBC', 'ICMS_vBC', 'ICMS_pICMS', 'ICMS_vICMS', 
             'ICMS_vBCFCPP', 'ICMS_pFCP', 'ICMS_vFCP', 
             'ICMS_modBCST', 'ICMS_pMVAST', 'ICMS_vBCST', 'ICMS_pICMSST', 'ICMS_vICMSST', 
@@ -106,9 +106,12 @@ def _parse_xml(path):
         nNF = inf.find('ns:ide/ns:nNF', ns).text
         
         emit = inf.find('ns:emit', ns)
-        xNome = emit.find('ns:xNome', ns).text
-        emitUF = emit.find('ns:enderEmit/ns:UF', ns).text
-        destUF = inf.find('ns:dest/ns:enderDest/ns:UF', ns).text
+        emit_xNome = emit.find('ns:xNome', ns).text
+        emit_UF = emit.find('ns:enderEmit/ns:UF', ns).text
+
+        dest = inf.find('ns:dest', ns)
+        dest_xNome = dest.find('ns:xNome', ns).text
+        dest_UF = dest.find('ns:enderDest/ns:UF', ns).text
 
         ICMSTot = inf.find('ns:total/ns:ICMSTot', ns)
         totals = {}
@@ -142,10 +145,11 @@ def _parse_xml(path):
             # Join totals dict with the new one being created
             nfe = {
                 'nNF': nNF,
-                'xNome': xNome,
+                'emit_xNome': emit_xNome,
+                'emit_UF': emit_UF,
+                'dest_UF': dest_UF,
+                'dest_xNome': dest_xNome,
                 'caminho': path,
-                'emitUF': emitUF,
-                'destUF': destUF,
                 **totals
             }
             
@@ -181,6 +185,7 @@ def _parse_xml(path):
 
             nfe['ICMS_orig'] = inner_icms.find('ns:orig', ns).text
             nfe['ICMS_CST'] = get_optional(inner_icms.find('ns:CST', ns))
+            nfe['ICMS_CSOSN'] = get_optional(inner_icms.find('ns:CSOSN', ns))
             nfe['ICMS_vBCSTRet'] = get_optional(inner_icms.find('ns:vBCSTRet', ns))
             nfe['ICMS_pST'] = get_optional(inner_icms.find('ns:pST', ns))
             nfe['ICMS_vICMSSTRet'] = get_optional(inner_icms.find('ns:vICMSSTRet', ns))
