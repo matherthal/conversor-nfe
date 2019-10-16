@@ -103,20 +103,20 @@ def _parse_xml(path):
             print(f"ATENÇÃO! O documento '{path}' não é válido e será ignorado!")
             return None
 
-        nNF = inf.find('ns:ide/ns:nNF', ns).text
+        nNF = get_optional(inf.find('ns:ide/ns:nNF', ns))
         
         emit = inf.find('ns:emit', ns)
-        emit_xNome = emit.find('ns:xNome', ns).text
-        emit_UF = emit.find('ns:enderEmit/ns:UF', ns).text
+        emit_xNome = get_optional(emit.find('ns:xNome', ns))
+        emit_UF = get_optional(emit.find('ns:enderEmit/ns:UF', ns))
 
         dest = inf.find('ns:dest', ns)
-        dest_xNome = dest.find('ns:xNome', ns).text
-        dest_UF = dest.find('ns:enderDest/ns:UF', ns).text
+        dest_xNome = get_optional(dest.find('ns:xNome', ns)) if dest else ''
+        dest_UF = get_optional(dest.find('ns:enderDest/ns:UF', ns)) if dest else ''
 
         ICMSTot = inf.find('ns:total/ns:ICMSTot', ns)
         totals = {}
-        totals['TOTAL_ICMS_vBC'] = ICMSTot.find('ns:vBC', ns).text
-        totals['TOTAL_vICMS'] = ICMSTot.find('ns:vICMS', ns).text
+        totals['TOTAL_ICMS_vBC'] = get_optional(ICMSTot.find('ns:vBC', ns))
+        totals['TOTAL_vICMS'] = get_optional(ICMSTot.find('ns:vICMS', ns))
         totals['TOTAL_vICMSDeson'] = round_optional(ICMSTot.find('ns:vICMSDeson', ns))
         totals['TOTAL_vFCPUFDest'] = round_optional(ICMSTot.find('ns:vFCPUFDest', ns))
         totals['TOTAL_vICMSUFDest'] = round_optional(ICMSTot.find('ns:vICMSUFDest', ns))
@@ -156,16 +156,16 @@ def _parse_xml(path):
             # Processing attributes of prod
             prod = det.find('ns:prod', ns)
 
-            nfe['cProd'] = prod.find('ns:cProd', ns).text
+            nfe['cProd'] = get_optional(prod.find('ns:cProd', ns))
             nfe['cEAN'] = get_optional(prod.find('ns:cEAN', ns))
-            nfe['xProd'] = prod.find('ns:xProd', ns).text
-            nfe['NCM'] = prod.find('ns:NCM', ns).text
+            nfe['xProd'] = get_optional(prod.find('ns:xProd', ns))
+            nfe['NCM'] = get_optional(prod.find('ns:NCM', ns))
             nfe['CEST'] = get_optional(prod.find('ns:CEST', ns))
-            nfe['CFOP'] = prod.find('ns:CFOP', ns).text
-            nfe['uCom'] = prod.find('ns:uCom', ns).text
-            nfe['qCom'] = prod.find('ns:qCom', ns).text
-            nfe['vUnCom'] = prod.find('ns:vUnCom', ns).text
-            nfe['vProd'] = prod.find('ns:vProd', ns).text
+            nfe['CFOP'] = get_optional(prod.find('ns:CFOP', ns))
+            nfe['uCom'] = get_optional(prod.find('ns:uCom', ns))
+            nfe['qCom'] = get_optional(prod.find('ns:qCom', ns))
+            nfe['vUnCom'] = get_optional(prod.find('ns:vUnCom', ns))
+            nfe['vProd'] = get_optional(prod.find('ns:vProd', ns))
             nfe['vDesc'] = round_optional(prod.find('ns:vDesc', ns))
             nfe['cEANTrib'] = get_optional(prod.find('ns:cEANTrib', ns))
             nfe['cProdANVISA'] = get_optional(prod.find('ns:med/ns:cProdANVISA', ns))
@@ -183,7 +183,7 @@ def _parse_xml(path):
             if len(inner_icms) > 1: raise Exception('Múltiplos campos dentro de ICMS')
             inner_icms = inner_icms[0]
 
-            nfe['ICMS_orig'] = inner_icms.find('ns:orig', ns).text
+            nfe['ICMS_orig'] = get_optional(inner_icms.find('ns:orig', ns))
             nfe['ICMS_CST'] = get_optional(inner_icms.find('ns:CST', ns))
             nfe['ICMS_CSOSN'] = get_optional(inner_icms.find('ns:CSOSN', ns))
             nfe['ICMS_vBCSTRet'] = get_optional(inner_icms.find('ns:vBCSTRet', ns))
@@ -220,7 +220,7 @@ def _parse_xml(path):
                 if tag not in tags:
                     raise Exception('Campos desconhecidos em PIS: ' + tag)
             
-            nfe['PIS_CST'] = pis.find('ns:CST', ns).text
+            nfe['PIS_CST'] = get_optional(pis.find('ns:CST', ns))
             nfe['PIS_vBC'] = round_optional(pis.find('ns:vBC', ns))
             nfe['PIS_pPIS'] = round_optional(pis.find('ns:pPIS', ns))
             nfe['PIS_vPIS'] = round_optional(pis.find('ns:vPIS', ns))
@@ -238,7 +238,7 @@ def _parse_xml(path):
                 if tag not in tags:
                     raise Exception('Campos desconhecidos em COFINS: ' + tag)
 
-            nfe['COFINS_CST'] = cofins.find('ns:CST', ns).text
+            nfe['COFINS_CST'] = get_optional(cofins.find('ns:CST', ns))
             nfe['COFINS_vBC'] = round_optional(cofins.find('ns:vBC', ns))
             nfe['COFINS_pCOFINS'] = round_optional(cofins.find('ns:pCOFINS', ns))
             nfe['COFINS_vCOFINS'] = round_optional(cofins.find('ns:vCOFINS', ns))
@@ -267,7 +267,7 @@ def _parse_xml(path):
 
                 #If IPI is "tributed" or not
                 if ipint:
-                    nfe['IPI_CST'] = ipint.find('ns:CST', ns).text
+                    nfe['IPI_CST'] = get_optional(ipint.find('ns:CST', ns))
                 elif ipitrib:
                     nfe['IPI_CST'] = get_optional(ipitrib.find('ns:CST', ns))
                     
