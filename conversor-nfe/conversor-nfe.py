@@ -169,6 +169,8 @@ def _parse_xml(path):
             nfe['vDesc'] = round_optional(prod.find('ns:vDesc', ns))
             nfe['cEANTrib'] = get_optional(prod.find('ns:cEANTrib', ns))
             nfe['nRECOPI'] = get_optional(prod.find('ns:nRECOPI', ns))
+            if nfe['nRECOPI']:
+                nfe['nRECOPI'] = "'" + nfe['nRECOPI'] + "'"
             nfe['cProdANVISA'] = get_optional(prod.find('ns:med/ns:cProdANVISA', ns))
 
             nfe['qCom'] = str(round(float(nfe['qCom']), DIGITS))
