@@ -32,7 +32,7 @@ def process_nfes(local):
     with open('output.csv', mode='w') as csv_file:
         fieldnames = [
             'emit_xNome', 'emit_UF', 'dest_xNome', 'dest_UF', 'nNF', 'cProd', 'xProd',
-            'NCM', 'cEAN', 'cEANTrib', 
+            'NCM', 'cEAN', 'cEANTrib', 'nRECOPI',
             'CEST', 'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vDesc', 'vTotTrib', 
             'ICMS_orig', 'ICMS_CST', 'ICMS_CSOSN', 'ICMS_vBCSTRet', 'ICMS_pST', 'ICMS_vICMSSTRet', 
             'ICMS_modBC', 'ICMS_pRedBC', 'ICMS_vBC', 'ICMS_pICMS', 'ICMS_vICMS', 
@@ -168,6 +168,7 @@ def _parse_xml(path):
             nfe['vProd'] = get_optional(prod.find('ns:vProd', ns))
             nfe['vDesc'] = round_optional(prod.find('ns:vDesc', ns))
             nfe['cEANTrib'] = get_optional(prod.find('ns:cEANTrib', ns))
+            nfe['nRECOPI'] = get_optional(prod.find('ns:nRECOPI', ns))
             nfe['cProdANVISA'] = get_optional(prod.find('ns:med/ns:cProdANVISA', ns))
 
             nfe['qCom'] = str(round(float(nfe['qCom']), DIGITS))
