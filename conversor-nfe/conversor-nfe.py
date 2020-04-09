@@ -31,9 +31,9 @@ def process_nfes(local):
 
     with open('output.csv', mode='w') as csv_file:
         fieldnames = [
-            'emit_xNome', 'emit_UF', 'dest_xNome', 'dest_UF', 'nNF', 'cProd', 'xProd',
-            'NCM', 'cEAN', 'cEANTrib', 'nRECOPI',
-            'CEST', 'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vDesc', 'vTotTrib', 
+            'emit_xNome', 'emit_UF', 'dest_xNome', 'dest_UF', 'nNF', 'refNFe', 'cProd', 'xProd',
+            'NCM', 'cEAN', 'cEANTrib', 'nRECOPI', 'CEST', 'cBenef', 
+            'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vDesc', 'vTotTrib', 
             'ICMS_orig', 'ICMS_CST', 'ICMS_CSOSN', 'ICMS_vBCSTRet', 'ICMS_pST', 'ICMS_vICMSSTRet', 
             'ICMS_modBC', 'ICMS_pRedBC', 'ICMS_vBC', 'ICMS_pICMS', 'ICMS_vICMS', 
             'ICMS_vBCFCPP', 'ICMS_pFCP', 'ICMS_vFCP', 
@@ -53,7 +53,7 @@ def process_nfes(local):
             'TOTAL_vST', 'TOTAL_vFCPST', 'TOTAL_vFCPSTRet', 'TOTAL_vProd', 
             'TOTAL_vFrete', 'TOTAL_vSeg', 'TOTAL_vDesc', 'TOTAL_vII', 'TOTAL_vIPI', 
             'TOTAL_vIPIDevol', 'TOTAL_vPIS', 'TOTAL_vCOFINS', 'TOTAL_vOutro', 
-            'TOTAL_vNF', 'TOTAL_vTotTrib', 'caminho']
+            'TOTAL_vNF', 'TOTAL_vTotTrib', 'infCpl', 'caminho']
         
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter=';', 
                                 lineterminator = '\n')
@@ -104,6 +104,7 @@ def _parse_xml(path):
             return None
 
         nNF = get_optional(inf.find('ns:ide/ns:nNF', ns))
+        refNFe = get_optional(inf.find('ns:ide/ns:NFref/ns:refNFe', ns))
         
         emit = inf.find('ns:emit', ns)
         emit_xNome = get_optional(emit.find('ns:xNome', ns))
@@ -112,6 +113,8 @@ def _parse_xml(path):
         dest = inf.find('ns:dest', ns)
         dest_xNome = get_optional(dest.find('ns:xNome', ns)) if dest else ''
         dest_UF = get_optional(dest.find('ns:enderDest/ns:UF', ns)) if dest else ''
+
+        infCpl = get_optional(inf.find('ns:infAdic/ns:infCpl', ns))
 
         ICMSTot = inf.find('ns:total/ns:ICMSTot', ns)
         totals = {}
@@ -145,10 +148,12 @@ def _parse_xml(path):
             # Join totals dict with the new one being created
             nfe = {
                 'nNF': nNF,
+                'refNFe': refNFe,
                 'emit_xNome': emit_xNome,
                 'emit_UF': emit_UF,
                 'dest_UF': dest_UF,
                 'dest_xNome': dest_xNome,
+                'infCpl': infCpl,
                 'caminho': path,
                 **totals
             }
@@ -161,6 +166,7 @@ def _parse_xml(path):
             nfe['xProd'] = get_optional(prod.find('ns:xProd', ns))
             nfe['NCM'] = get_optional(prod.find('ns:NCM', ns))
             nfe['CEST'] = get_optional(prod.find('ns:CEST', ns))
+            nfe['cBenef'] = get_optional(prod.find('ns:cBenef', ns))
             nfe['CFOP'] = get_optional(prod.find('ns:CFOP', ns))
             nfe['uCom'] = get_optional(prod.find('ns:uCom', ns))
             nfe['qCom'] = get_optional(prod.find('ns:qCom', ns))
@@ -172,7 +178,7 @@ def _parse_xml(path):
             if nfe['nRECOPI']:
                 nfe['nRECOPI'] = "'" + nfe['nRECOPI'] + "'"
             nfe['cProdANVISA'] = get_optional(prod.find('ns:med/ns:cProdANVISA', ns))
-
+            
             nfe['qCom'] = str(round(float(nfe['qCom']), DIGITS))
             nfe['vUnCom'] = str(round(float(nfe['vUnCom']), DIGITS))
             nfe['vProd'] = str(round(float(nfe['vProd']), DIGITS))
