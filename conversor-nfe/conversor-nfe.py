@@ -4,6 +4,7 @@ import os
 import csv
 import sys, traceback
 import xml.etree.ElementTree as ET
+from datetime import datetime
 
 DIGITS=2
 
@@ -31,8 +32,9 @@ def process_nfes(local):
 
     with open('output.csv', mode='w') as csv_file:
         fieldnames = [
-            'emit_xNome', 'emit_UF', 'dest_xNome', 'dest_UF', 'nNF', 'refNFe', 'cProd', 'xProd',
-            'NCM', 'cEAN', 'cEANTrib', 'nRECOPI', 'CEST', 'cBenef', 
+            'emit_xNome', 'emit_UF', 'dest_xNome', 'dest_UF', 'nNF', 'refNFe', 
+            'dhEmi_data', 'dhEmi_hora', 'cProd', 'xProd', 
+            'NCM', 'cEAN', 'cEANTrib', 'nRECOPI', 'CEST', 'cBenef', 'vFrete',
             'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vDesc', 'vTotTrib', 
             'ICMS_orig', 'ICMS_CST', 'ICMS_CSOSN', 'ICMS_vBCSTRet', 'ICMS_pST', 'ICMS_vICMSSTRet', 
             'ICMS_modBC', 'ICMS_pRedBC', 'ICMS_vBC', 'ICMS_pICMS', 'ICMS_vICMS', 
@@ -70,12 +72,14 @@ def process_nfes(local):
                     writer.writerow(nfe)
     
     print('Aplicação executou com sucesso!')
-    print(f'FORAM PROCESSADOS {count} DOCUMENTOS')
+    print(f'FORAM PROCESSADOS {count} DOCUMENTO(S)')
 
 def _fetch_xml_files(path):
     '''Recursive search for .xml files
     ''' 
     paths = []
+
+    current_file = os.path.basename(__file__)
 
     for (dirpath, dirnames, filenames) in os.walk(path):
         for f in filenames:
@@ -83,7 +87,7 @@ def _fetch_xml_files(path):
                 fpath = os.path.join(dirpath, f)
                 print(fpath)
                 paths.append(fpath)
-            else:
+            elif f != current_file:
                 print(f"O arquivo {f} não é um XML")
 
     if paths == [] and os.path.isfile(path) and path.lower().endswith('.xml'):
@@ -103,8 +107,14 @@ def _parse_xml(path):
             print(f"ATENÇÃO! O documento '{path}' não é válido e será ignorado!")
             return None
 
-        nNF = get_optional(inf.find('ns:ide/ns:nNF', ns))
-        refNFe = get_optional(inf.find('ns:ide/ns:NFref/ns:refNFe', ns))
+        ide = inf.find('ns:ide', ns)
+        nNF = get_optional(ide.find('ns:nNF', ns))
+        refNFe = get_optional(ide.find('ns:NFref/ns:refNFe', ns))
+        dhEmi = get_optional(ide.find('ns:dhEmi', ns))
+        if dhEmi:
+            dhEmi = datetime.strptime(dhEmi, '%Y-%m-%dT%H:%M:%S%z')
+            dhEmi_data = dhEmi.strftime('%Y-%m-%d')
+            dhEmi_hora = dhEmi.strftime('%H:%M:%S')
         
         emit = inf.find('ns:emit', ns)
         emit_xNome = get_optional(emit.find('ns:xNome', ns))
@@ -149,6 +159,8 @@ def _parse_xml(path):
             nfe = {
                 'nNF': nNF,
                 'refNFe': refNFe,
+                'dhEmi_data': dhEmi_data,
+                'dhEmi_hora': dhEmi_hora,
                 'emit_xNome': emit_xNome,
                 'emit_UF': emit_UF,
                 'dest_UF': dest_UF,
@@ -178,6 +190,7 @@ def _parse_xml(path):
             if nfe['nRECOPI']:
                 nfe['nRECOPI'] = "'" + nfe['nRECOPI'] + "'"
             nfe['cProdANVISA'] = get_optional(prod.find('ns:med/ns:cProdANVISA', ns))
+            nfe['vFrete'] = get_optional(prod.find('ns:vFrete', ns))
             
             nfe['qCom'] = str(round(float(nfe['qCom']), DIGITS))
             nfe['vUnCom'] = str(round(float(nfe['vUnCom']), DIGITS))
