@@ -33,7 +33,7 @@ def process_nfes(local):
     with open('output.csv', mode='w') as csv_file:
         fieldnames = [
             'emit_xNome', 'emit_UF', 'dest_xNome', 'dest_UF', 'nNF', 'refNFe', 
-            'dhEmi_data', 'dhEmi_hora', 'cProd', 'xProd', 
+            'dhEmi_data', 'dhEmi_hora', 'dhSaiEnt_data', 'dhSaiEnt_hora', 'cProd', 'xProd', 
             'NCM', 'cEAN', 'cEANTrib', 'nRECOPI', 'CEST', 'cBenef', 'vFrete',
             'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vDesc', 'vTotTrib', 
             'ICMS_orig', 'ICMS_CST', 'ICMS_CSOSN', 'ICMS_vBCSTRet', 'ICMS_pST', 'ICMS_vICMSSTRet', 
@@ -110,11 +110,18 @@ def _parse_xml(path):
         ide = inf.find('ns:ide', ns)
         nNF = get_optional(ide.find('ns:nNF', ns))
         refNFe = get_optional(ide.find('ns:NFref/ns:refNFe', ns))
+
         dhEmi = get_optional(ide.find('ns:dhEmi', ns))
         if dhEmi:
             dhEmi = datetime.strptime(dhEmi, '%Y-%m-%dT%H:%M:%S%z')
             dhEmi_data = dhEmi.strftime('%Y-%m-%d')
             dhEmi_hora = dhEmi.strftime('%H:%M:%S')
+
+        dhSaiEnt = get_optional(ide.find('ns:dhSaiEnt', ns))
+        if dhSaiEnt:
+            dhSaiEnt = datetime.strptime(dhSaiEnt, '%Y-%m-%dT%H:%M:%S%z')
+            dhSaiEnt_data = dhSaiEnt.strftime('%Y-%m-%d')
+            dhSaiEnt_hora = dhSaiEnt.strftime('%H:%M:%S')
         
         emit = inf.find('ns:emit', ns)
         emit_xNome = get_optional(emit.find('ns:xNome', ns))
@@ -161,6 +168,8 @@ def _parse_xml(path):
                 'refNFe': refNFe,
                 'dhEmi_data': dhEmi_data,
                 'dhEmi_hora': dhEmi_hora,
+                'dhSaiEnt_data': dhSaiEnt_data,
+                'dhSaiEnt_hora': dhSaiEnt_hora,
                 'emit_xNome': emit_xNome,
                 'emit_UF': emit_UF,
                 'dest_UF': dest_UF,
