@@ -211,35 +211,50 @@ def _parse_xml(path):
             nfe['vTotTrib'] = get_optional(imposto.find('ns:vTotTrib', ns))
             
             # Imposto ICMS
-            inner_icms = imposto.find('ns:ICMS', ns).findall('*')
-            if len(inner_icms) > 1: raise Exception('Múltiplos campos dentro de ICMS')
-            inner_icms = inner_icms[0]
+            inner_icms = imposto.find('ns:ICMS', ns)
+            if inner_icms:
+                inner_icms = inner_icms.findall('*')
+                if len(inner_icms) > 1: 
+                    raise Exception('Múltiplos campos dentro de ICMS')
+                inner_icms = inner_icms[0]
 
-            nfe['ICMS_orig'] = get_optional(inner_icms.find('ns:orig', ns))
-            nfe['ICMS_CST'] = get_optional(inner_icms.find('ns:CST', ns))
-            nfe['ICMS_CSOSN'] = get_optional(inner_icms.find('ns:CSOSN', ns))
-            nfe['ICMS_vBCSTRet'] = get_optional(inner_icms.find('ns:vBCSTRet', ns))
-            nfe['ICMS_pST'] = get_optional(inner_icms.find('ns:pST', ns))
-            nfe['ICMS_vICMSSTRet'] = get_optional(inner_icms.find('ns:vICMSSTRet', ns))
-            
-            nfe['ICMS_modBC'] = get_optional(inner_icms.find('ns:modBC', ns))
-            nfe['ICMS_pRedBC'] = round_optional(inner_icms.find('ns:pRedBC', ns))
-            nfe['ICMS_vBC'] = round_optional(inner_icms.find('ns:vBC', ns))
-            nfe['ICMS_pICMS'] = round_optional(inner_icms.find('ns:pICMS', ns))
-            nfe['ICMS_vICMS'] = round_optional(inner_icms.find('ns:vICMS', ns))
-            nfe['ICMS_vBCFCPP'] = round_optional(inner_icms.find('ns:vBCFCPP', ns))
-            nfe['ICMS_pFCP'] = round_optional(inner_icms.find('ns:pFCP', ns))
-            nfe['ICMS_vFCP'] = round_optional(inner_icms.find('ns:vFCP', ns))
-            
-            # ICMS filds that may appear in ICMS70 and ICMS10
-            nfe['ICMS_modBCST'] = get_optional(inner_icms.find('ns:modBCST', ns))
-            nfe['ICMS_pMVAST'] = round_optional(inner_icms.find('ns:pMVAST', ns))
-            nfe['ICMS_vBCST'] = round_optional(inner_icms.find('ns:vBCST', ns))
-            nfe['ICMS_pICMSST'] = round_optional(inner_icms.find('ns:pICMSST', ns))
-            nfe['ICMS_vICMSST'] = round_optional(inner_icms.find('ns:vICMSST', ns))
-            nfe['ICMS_vBCFCPST'] = round_optional(inner_icms.find('ns:vBCFCPST', ns))
-            nfe['ICMS_pFCPST'] = round_optional(inner_icms.find('ns:pFCPST', ns))
-            nfe['ICMS_vFCPST'] = round_optional(inner_icms.find('ns:vFCPST', ns))
+                nfe['ICMS_orig'] = get_optional(inner_icms.find('ns:orig', ns))
+                nfe['ICMS_CST'] = get_optional(inner_icms.find('ns:CST', ns))
+                nfe['ICMS_CSOSN'] = get_optional(inner_icms.find('ns:CSOSN', ns))
+                nfe['ICMS_vBCSTRet'] = get_optional(inner_icms.find('ns:vBCSTRet', ns))
+                nfe['ICMS_pST'] = get_optional(inner_icms.find('ns:pST', ns))
+                nfe['ICMS_vICMSSTRet'] = get_optional(inner_icms.find('ns:vICMSSTRet', ns))
+                
+                nfe['ICMS_modBC'] = get_optional(inner_icms.find('ns:modBC', ns))
+                nfe['ICMS_pRedBC'] = round_optional(inner_icms.find('ns:pRedBC', ns))
+                nfe['ICMS_vBC'] = round_optional(inner_icms.find('ns:vBC', ns))
+                nfe['ICMS_pICMS'] = round_optional(inner_icms.find('ns:pICMS', ns))
+                nfe['ICMS_vICMS'] = round_optional(inner_icms.find('ns:vICMS', ns))
+                nfe['ICMS_vBCFCPP'] = round_optional(inner_icms.find('ns:vBCFCPP', ns))
+                nfe['ICMS_pFCP'] = round_optional(inner_icms.find('ns:pFCP', ns))
+                nfe['ICMS_vFCP'] = round_optional(inner_icms.find('ns:vFCP', ns))
+                
+                # ICMS filds that may appear in ICMS70 and ICMS10
+                nfe['ICMS_modBCST'] = get_optional(inner_icms.find('ns:modBCST', ns))
+                nfe['ICMS_pMVAST'] = round_optional(inner_icms.find('ns:pMVAST', ns))
+                nfe['ICMS_vBCST'] = round_optional(inner_icms.find('ns:vBCST', ns))
+                nfe['ICMS_pICMSST'] = round_optional(inner_icms.find('ns:pICMSST', ns))
+                nfe['ICMS_vICMSST'] = round_optional(inner_icms.find('ns:vICMSST', ns))
+                nfe['ICMS_vBCFCPST'] = round_optional(inner_icms.find('ns:vBCFCPST', ns))
+                nfe['ICMS_pFCPST'] = round_optional(inner_icms.find('ns:pFCPST', ns))
+                nfe['ICMS_vFCPST'] = round_optional(inner_icms.find('ns:vFCPST', ns))
+            else:
+                # Nota de serviço não tem ICMS
+                icms_fields = [
+                    'ICMS_orig', 'ICMS_CST', 'ICMS_CSOSN', 'ICMS_vBCSTRet', 
+                    'ICMS_pST', 'ICMS_vICMSSTRet', 'ICMS_modBC', 'ICMS_pRedBC',
+                    'ICMS_vBC', 'ICMS_pICMS', 'ICMS_vICMS', 'ICMS_vBCFCPP',
+                    'ICMS_pFCP', 'ICMS_vFCP', 'ICMS_modBCST', 'ICMS_pMVAST',
+                    'ICMS_vBCST', 'ICMS_pICMSST', 'ICMS_vICMSST', 
+                    'ICMS_vBCFCPST', 'ICMS_pFCPST', 'ICMS_vFCPST'
+                ]
+                for field in icms_fields:
+                    nfe[field] = ''
 
             # Imposto PIS
             pis = imposto.find('ns:PIS', ns).findall('*')
