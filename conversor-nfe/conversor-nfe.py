@@ -120,8 +120,9 @@ def _parse_xml(path):
         dhSaiEnt = get_optional(ide.find('ns:dhSaiEnt', ns))
         if dhSaiEnt:
             dhSaiEnt = datetime.strptime(dhSaiEnt, '%Y-%m-%dT%H:%M:%S%z')
-            dhSaiEnt_data = dhSaiEnt.strftime('%Y-%m-%d')
-            dhSaiEnt_hora = dhSaiEnt.strftime('%H:%M:%S')
+
+        dhSaiEnt_data = dhSaiEnt.strftime('%Y-%m-%d') if dhSaiEnt else ''
+        dhSaiEnt_hora = dhSaiEnt.strftime('%H:%M:%S') if dhSaiEnt else ''
         
         emit = inf.find('ns:emit', ns)
         emit_xNome = get_optional(emit.find('ns:xNome', ns))
