@@ -32,15 +32,18 @@ def process_nfes(local):
 
     with open('output.csv', mode='w') as csv_file:
         fieldnames = [
-            'emit_xNome', 'emit_UF', 'dest_xNome', 'dest_UF', 'nNF', 'refNFe', 
-            'dhEmi_data', 'dhEmi_hora', 'dhSaiEnt_data', 'dhSaiEnt_hora', 'cProd', 'xProd', 
+            'emit_xNome', 'emit_UF', 'emit_CNPJ', 
+            'dest_xNome', 'dest_UF', 'dest_CNPJ', 
+            'nNF', 'refNFe', 'dhEmi_data', 'dhEmi_hora', 'dhSaiEnt_data', 
+            'dhSaiEnt_hora', 'cProd', 'xProd', 
             'NCM', 'cEAN', 'cEANTrib', 'nRECOPI', 'CEST', 'cBenef', 'vFrete',
-            'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vDesc', 'vTotTrib', 
-            'ICMS_orig', 'ICMS_CST', 'ICMS_CSOSN', 'ICMS_vBCSTRet', 'ICMS_pST', 'ICMS_vICMSSTRet', 
-            'ICMS_modBC', 'ICMS_pRedBC', 'ICMS_vBC', 'ICMS_pICMS', 'ICMS_vICMS', 
-            'ICMS_vBCFCPP', 'ICMS_pFCP', 'ICMS_vFCP', 
-            'ICMS_modBCST', 'ICMS_pMVAST', 'ICMS_vBCST', 'ICMS_pICMSST', 'ICMS_vICMSST', 
-            'ICMS_vBCFCPST', 'ICMS_pFCPST', 'ICMS_vFCPST',
+            'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vDesc', 
+            'vTotTrib', 
+            'ICMS_orig', 'ICMS_CST', 'ICMS_CSOSN', 'ICMS_vBCSTRet', 'ICMS_pST', 
+            'ICMS_vICMSSTRet', 'ICMS_modBC', 'ICMS_pRedBC', 'ICMS_vBC', 
+            'ICMS_pICMS', 'ICMS_vICMS', 'ICMS_vBCFCPP', 'ICMS_pFCP', 'ICMS_vFCP', 
+            'ICMS_modBCST', 'ICMS_pMVAST', 'ICMS_vBCST', 'ICMS_pICMSST', 
+            'ICMS_vICMSST', 'ICMS_vBCFCPST', 'ICMS_pFCPST', 'ICMS_vFCPST',
             'PIS_CST', 'PIS_vBC', 'PIS_pPIS', 'PIS_vPIS', 
             'PIS_qBCProd', 'PIS_vAliqProd', 
             'COFINS_CST', 'COFINS_vBC', 'COFINS_pCOFINS', 'COFINS_vCOFINS', 
@@ -55,8 +58,8 @@ def process_nfes(local):
             'TOTAL_vST', 'TOTAL_vFCPST', 'TOTAL_vFCPSTRet', 'TOTAL_vProd', 
             'TOTAL_vFrete', 'TOTAL_vSeg', 'TOTAL_vDesc', 'TOTAL_vII', 'TOTAL_vIPI', 
             'TOTAL_vIPIDevol', 'TOTAL_vPIS', 'TOTAL_vCOFINS', 'TOTAL_vOutro', 
-            'TOTAL_vNF', 'TOTAL_vTotTrib', 'infCpl', 'caminho']
-        
+            'TOTAL_vNF', 'TOTAL_vTotTrib', 'infCpl', 'chNFe', 'caminho']
+
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter=';', 
                                 lineterminator = '\n')
         writer.writeheader()
@@ -102,7 +105,10 @@ def _parse_xml(path):
         root = ET.parse(path)
 
         ns = {'ns': 'http://www.portalfiscal.inf.br/nfe'} 
-        inf = root.find('ns:NFe/ns:infNFe', ns)        
+
+        chNFe = get_optional(root.find('ns:protNFe/ns:infProt/ns:chNFe', ns))
+
+        inf = root.find('ns:NFe/ns:infNFe', ns)
         if inf is None:
             print(f"ATENÇÃO! O documento '{path}' não é válido e será ignorado!")
             return None
@@ -127,10 +133,12 @@ def _parse_xml(path):
         emit = inf.find('ns:emit', ns)
         emit_xNome = get_optional(emit.find('ns:xNome', ns))
         emit_UF = get_optional(emit.find('ns:enderEmit/ns:UF', ns))
+        emit_CNPJ = get_optional(emit.find('ns:CNPJ', ns))
 
         dest = inf.find('ns:dest', ns)
         dest_xNome = get_optional(dest.find('ns:xNome', ns)) if dest else ''
         dest_UF = get_optional(dest.find('ns:enderDest/ns:UF', ns)) if dest else ''
+        dest_CNPJ = get_optional(dest.find('ns:CNPJ', ns)) if dest else ''
 
         infCpl = get_optional(inf.find('ns:infAdic/ns:infCpl', ns))
 
@@ -173,9 +181,12 @@ def _parse_xml(path):
                 'dhSaiEnt_hora': dhSaiEnt_hora,
                 'emit_xNome': emit_xNome,
                 'emit_UF': emit_UF,
+                'emit_CNPJ': emit_CNPJ,
                 'dest_UF': dest_UF,
                 'dest_xNome': dest_xNome,
+                'dest_CNPJ': dest_CNPJ,
                 'infCpl': infCpl,
+                'chNFe': chNFe,
                 'caminho': path,
                 **totals
             }
@@ -328,7 +339,7 @@ def _parse_xml(path):
                     nfe['IPI_vIPI'] = get_optional(ipitrib.find('ns:vIPI', ns))
                 
             nfes.append(nfe)
-                
+
         return nfes
     except:
         print("ERRO! Não consegui ler o arquivo " + path)
