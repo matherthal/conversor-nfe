@@ -58,7 +58,7 @@ def process_nfes(local):
             'TOTAL_vST', 'TOTAL_vFCPST', 'TOTAL_vFCPSTRet', 'TOTAL_vProd', 
             'TOTAL_vFrete', 'TOTAL_vSeg', 'TOTAL_vDesc', 'TOTAL_vII', 'TOTAL_vIPI', 
             'TOTAL_vIPIDevol', 'TOTAL_vPIS', 'TOTAL_vCOFINS', 'TOTAL_vOutro', 
-            'TOTAL_vNF', 'TOTAL_vTotTrib', 'infCpl', 'chNFe', 'caminho']
+            'TOTAL_vNF', 'TOTAL_vTotTrib', 'infCpl', 'chNFe', 'nItem', 'caminho']
 
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter=';', 
                                 lineterminator = '\n')
@@ -171,6 +171,8 @@ def _parse_xml(path):
         nfes = []
         
         for det in inf.findall('ns:det', ns):
+            nItem = det.attrib['nItem'] if 'nItem' in det.attrib else ''
+
             # Join totals dict with the new one being created
             nfe = {
                 'nNF': nNF,
@@ -187,6 +189,7 @@ def _parse_xml(path):
                 'dest_CNPJ': dest_CNPJ,
                 'infCpl': infCpl,
                 'chNFe': chNFe,
+                'nItem': nItem,
                 'caminho': path,
                 **totals
             }
