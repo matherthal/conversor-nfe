@@ -65,15 +65,17 @@ def process_nfes(local):
         writer.writeheader()
         
         count = 0
+        first_line = True
         for nfes in parsed:
             if nfes is None:
                 continue
-            
+
             count += 1
             for nfe in nfes:
-                if nfe is not None:
+                if nfe is not None and not first_line:
                     writer.writerow(nfe)
-    
+                first_line = False
+
     print('Aplicação executou com sucesso!')
     print(f'FORAM PROCESSADOS {count} DOCUMENTO(S)')
 
@@ -107,6 +109,7 @@ def _parse_xml(path):
         ns = {'ns': 'http://www.portalfiscal.inf.br/nfe'} 
 
         chNFe = get_optional(root.find('ns:protNFe/ns:infProt/ns:chNFe', ns))
+        chNFe = f"{chNFe}_" if chNFe else ''
 
         inf = root.find('ns:NFe/ns:infNFe', ns)
         if inf is None:
@@ -169,7 +172,8 @@ def _parse_xml(path):
         totals['TOTAL_vTotTrib'] = round_optional(ICMSTot.find('ns:vTotTrib', ns))
 
         nfes = []
-        
+
+        first_line = True
         for det in inf.findall('ns:det', ns):
             nItem = det.attrib['nItem'] if 'nItem' in det.attrib else ''
 
@@ -340,7 +344,11 @@ def _parse_xml(path):
                     nfe['IPI_vUnid'] = round_optional(ipitrib.find('ns:vUnid', ns))
                     
                     nfe['IPI_vIPI'] = get_optional(ipitrib.find('ns:vIPI', ns))
-                
+
+
+            if nItem and int(nItem)==1:
+                nfes.append({n: '' for n in nfe.keys()})
+
             nfes.append(nfe)
 
         return nfes
