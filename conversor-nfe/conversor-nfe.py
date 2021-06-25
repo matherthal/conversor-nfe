@@ -6,22 +6,12 @@ import sys, traceback
 import xml.etree.ElementTree as ET
 from datetime import datetime
 
-DIGITS=2
-
 def get_optional(v): 
     '''Get attribute text if the object is not None
     '''
     if v is not None:
         return v.text
     else: 
-        return None
-
-def round_optional(v, digits=2): 
-    '''If value is not None then round it to number of digits and convert it to string 
-    '''
-    if v is not None:
-        return str(round(float(v.text), digits)) 
-    else:
         return None
 
 def process_nfes(local):
@@ -149,27 +139,27 @@ def _parse_xml(path):
         totals = {}
         totals['TOTAL_ICMS_vBC'] = get_optional(ICMSTot.find('ns:vBC', ns))
         totals['TOTAL_vICMS'] = get_optional(ICMSTot.find('ns:vICMS', ns))
-        totals['TOTAL_vICMSDeson'] = round_optional(ICMSTot.find('ns:vICMSDeson', ns))
-        totals['TOTAL_vFCPUFDest'] = round_optional(ICMSTot.find('ns:vFCPUFDest', ns))
-        totals['TOTAL_vICMSUFDest'] = round_optional(ICMSTot.find('ns:vICMSUFDest', ns))
-        totals['TOTAL_vICMSUFRemet'] = round_optional(ICMSTot.find('ns:vICMSUFRemet', ns))
-        totals['TOTAL_vFCP'] = round_optional(ICMSTot.find('ns:vFCP', ns))
-        totals['TOTAL_vBCST'] = round_optional(ICMSTot.find('ns:vBCST', ns))
-        totals['TOTAL_vST'] = round_optional(ICMSTot.find('ns:vST', ns))
-        totals['TOTAL_vFCPST'] = round_optional(ICMSTot.find('ns:vFCPST', ns))
-        totals['TOTAL_vFCPSTRet'] = round_optional(ICMSTot.find('ns:vFCPSTRet', ns))
-        totals['TOTAL_vProd'] = round_optional(ICMSTot.find('ns:vProd', ns))
-        totals['TOTAL_vFrete'] = round_optional(ICMSTot.find('ns:vFrete', ns))
-        totals['TOTAL_vSeg'] = round_optional(ICMSTot.find('ns:vSeg', ns))
-        totals['TOTAL_vDesc'] = round_optional(ICMSTot.find('ns:vDesc', ns))
-        totals['TOTAL_vII'] = round_optional(ICMSTot.find('ns:vII', ns))
-        totals['TOTAL_vIPI'] = round_optional(ICMSTot.find('ns:vIPI', ns))
-        totals['TOTAL_vIPIDevol'] = round_optional(ICMSTot.find('ns:vIPIDevol', ns))
-        totals['TOTAL_vPIS'] = round_optional(ICMSTot.find('ns:vPIS', ns))
-        totals['TOTAL_vCOFINS'] = round_optional(ICMSTot.find('ns:vCOFINS', ns))
-        totals['TOTAL_vOutro'] = round_optional(ICMSTot.find('ns:vOutro', ns))
-        totals['TOTAL_vNF'] = round_optional(ICMSTot.find('ns:vNF', ns))
-        totals['TOTAL_vTotTrib'] = round_optional(ICMSTot.find('ns:vTotTrib', ns))
+        totals['TOTAL_vICMSDeson'] = get_optional(ICMSTot.find('ns:vICMSDeson', ns))
+        totals['TOTAL_vFCPUFDest'] = get_optional(ICMSTot.find('ns:vFCPUFDest', ns))
+        totals['TOTAL_vICMSUFDest'] = get_optional(ICMSTot.find('ns:vICMSUFDest', ns))
+        totals['TOTAL_vICMSUFRemet'] = get_optional(ICMSTot.find('ns:vICMSUFRemet', ns))
+        totals['TOTAL_vFCP'] = get_optional(ICMSTot.find('ns:vFCP', ns))
+        totals['TOTAL_vBCST'] = get_optional(ICMSTot.find('ns:vBCST', ns))
+        totals['TOTAL_vST'] = get_optional(ICMSTot.find('ns:vST', ns))
+        totals['TOTAL_vFCPST'] = get_optional(ICMSTot.find('ns:vFCPST', ns))
+        totals['TOTAL_vFCPSTRet'] = get_optional(ICMSTot.find('ns:vFCPSTRet', ns))
+        totals['TOTAL_vProd'] = get_optional(ICMSTot.find('ns:vProd', ns))
+        totals['TOTAL_vFrete'] = get_optional(ICMSTot.find('ns:vFrete', ns))
+        totals['TOTAL_vSeg'] = get_optional(ICMSTot.find('ns:vSeg', ns))
+        totals['TOTAL_vDesc'] = get_optional(ICMSTot.find('ns:vDesc', ns))
+        totals['TOTAL_vII'] = get_optional(ICMSTot.find('ns:vII', ns))
+        totals['TOTAL_vIPI'] = get_optional(ICMSTot.find('ns:vIPI', ns))
+        totals['TOTAL_vIPIDevol'] = get_optional(ICMSTot.find('ns:vIPIDevol', ns))
+        totals['TOTAL_vPIS'] = get_optional(ICMSTot.find('ns:vPIS', ns))
+        totals['TOTAL_vCOFINS'] = get_optional(ICMSTot.find('ns:vCOFINS', ns))
+        totals['TOTAL_vOutro'] = get_optional(ICMSTot.find('ns:vOutro', ns))
+        totals['TOTAL_vNF'] = get_optional(ICMSTot.find('ns:vNF', ns))
+        totals['TOTAL_vTotTrib'] = get_optional(ICMSTot.find('ns:vTotTrib', ns))
 
         nfes = []
 
@@ -212,17 +202,13 @@ def _parse_xml(path):
             nfe['qCom'] = get_optional(prod.find('ns:qCom', ns))
             nfe['vUnCom'] = get_optional(prod.find('ns:vUnCom', ns))
             nfe['vProd'] = get_optional(prod.find('ns:vProd', ns))
-            nfe['vDesc'] = round_optional(prod.find('ns:vDesc', ns))
+            nfe['vDesc'] = get_optional(prod.find('ns:vDesc', ns))
             nfe['cEANTrib'] = get_optional(prod.find('ns:cEANTrib', ns))
             nfe['nRECOPI'] = get_optional(prod.find('ns:nRECOPI', ns))
             if nfe['nRECOPI']:
                 nfe['nRECOPI'] = "'" + nfe['nRECOPI'] + "'"
             nfe['cProdANVISA'] = get_optional(prod.find('ns:med/ns:cProdANVISA', ns))
             nfe['vFrete'] = get_optional(prod.find('ns:vFrete', ns))
-            
-            nfe['qCom'] = str(round(float(nfe['qCom']), DIGITS))
-            nfe['vUnCom'] = str(round(float(nfe['vUnCom']), DIGITS))
-            nfe['vProd'] = str(round(float(nfe['vProd']), DIGITS))
 
             # Processing attributes of imposto
             imposto = det.find('ns:imposto', ns)
@@ -244,23 +230,23 @@ def _parse_xml(path):
                 nfe['ICMS_vICMSSTRet'] = get_optional(inner_icms.find('ns:vICMSSTRet', ns))
                 
                 nfe['ICMS_modBC'] = get_optional(inner_icms.find('ns:modBC', ns))
-                nfe['ICMS_pRedBC'] = round_optional(inner_icms.find('ns:pRedBC', ns))
-                nfe['ICMS_vBC'] = round_optional(inner_icms.find('ns:vBC', ns))
-                nfe['ICMS_pICMS'] = round_optional(inner_icms.find('ns:pICMS', ns))
-                nfe['ICMS_vICMS'] = round_optional(inner_icms.find('ns:vICMS', ns))
-                nfe['ICMS_vBCFCPP'] = round_optional(inner_icms.find('ns:vBCFCPP', ns))
-                nfe['ICMS_pFCP'] = round_optional(inner_icms.find('ns:pFCP', ns))
-                nfe['ICMS_vFCP'] = round_optional(inner_icms.find('ns:vFCP', ns))
+                nfe['ICMS_pRedBC'] = get_optional(inner_icms.find('ns:pRedBC', ns))
+                nfe['ICMS_vBC'] = get_optional(inner_icms.find('ns:vBC', ns))
+                nfe['ICMS_pICMS'] = get_optional(inner_icms.find('ns:pICMS', ns))
+                nfe['ICMS_vICMS'] = get_optional(inner_icms.find('ns:vICMS', ns))
+                nfe['ICMS_vBCFCPP'] = get_optional(inner_icms.find('ns:vBCFCPP', ns))
+                nfe['ICMS_pFCP'] = get_optional(inner_icms.find('ns:pFCP', ns))
+                nfe['ICMS_vFCP'] = get_optional(inner_icms.find('ns:vFCP', ns))
                 
                 # ICMS filds that may appear in ICMS70 and ICMS10
                 nfe['ICMS_modBCST'] = get_optional(inner_icms.find('ns:modBCST', ns))
-                nfe['ICMS_pMVAST'] = round_optional(inner_icms.find('ns:pMVAST', ns))
-                nfe['ICMS_vBCST'] = round_optional(inner_icms.find('ns:vBCST', ns))
-                nfe['ICMS_pICMSST'] = round_optional(inner_icms.find('ns:pICMSST', ns))
-                nfe['ICMS_vICMSST'] = round_optional(inner_icms.find('ns:vICMSST', ns))
-                nfe['ICMS_vBCFCPST'] = round_optional(inner_icms.find('ns:vBCFCPST', ns))
-                nfe['ICMS_pFCPST'] = round_optional(inner_icms.find('ns:pFCPST', ns))
-                nfe['ICMS_vFCPST'] = round_optional(inner_icms.find('ns:vFCPST', ns))
+                nfe['ICMS_pMVAST'] = get_optional(inner_icms.find('ns:pMVAST', ns))
+                nfe['ICMS_vBCST'] = get_optional(inner_icms.find('ns:vBCST', ns))
+                nfe['ICMS_pICMSST'] = get_optional(inner_icms.find('ns:pICMSST', ns))
+                nfe['ICMS_vICMSST'] = get_optional(inner_icms.find('ns:vICMSST', ns))
+                nfe['ICMS_vBCFCPST'] = get_optional(inner_icms.find('ns:vBCFCPST', ns))
+                nfe['ICMS_pFCPST'] = get_optional(inner_icms.find('ns:pFCPST', ns))
+                nfe['ICMS_vFCPST'] = get_optional(inner_icms.find('ns:vFCPST', ns))
             else:
                 # Nota de serviço não tem ICMS
                 icms_fields = [
@@ -286,11 +272,11 @@ def _parse_xml(path):
                     raise Exception('Campos desconhecidos em PIS: ' + tag)
             
             nfe['PIS_CST'] = get_optional(pis.find('ns:CST', ns))
-            nfe['PIS_vBC'] = round_optional(pis.find('ns:vBC', ns))
-            nfe['PIS_pPIS'] = round_optional(pis.find('ns:pPIS', ns))
-            nfe['PIS_vPIS'] = round_optional(pis.find('ns:vPIS', ns))
-            nfe['PIS_qBCProd'] = round_optional(pis.find('ns:qBCProd', ns))
-            nfe['PIS_vAliqProd'] = round_optional(pis.find('ns:vAliqProd', ns))
+            nfe['PIS_vBC'] = get_optional(pis.find('ns:vBC', ns))
+            nfe['PIS_pPIS'] = get_optional(pis.find('ns:pPIS', ns))
+            nfe['PIS_vPIS'] = get_optional(pis.find('ns:vPIS', ns))
+            nfe['PIS_qBCProd'] = get_optional(pis.find('ns:qBCProd', ns))
+            nfe['PIS_vAliqProd'] = get_optional(pis.find('ns:vAliqProd', ns))
 
             # Imposto COFINS
             cofins = imposto.find('ns:COFINS', ns).findall('*')
@@ -304,23 +290,23 @@ def _parse_xml(path):
                     raise Exception('Campos desconhecidos em COFINS: ' + tag)
 
             nfe['COFINS_CST'] = get_optional(cofins.find('ns:CST', ns))
-            nfe['COFINS_vBC'] = round_optional(cofins.find('ns:vBC', ns))
-            nfe['COFINS_pCOFINS'] = round_optional(cofins.find('ns:pCOFINS', ns))
-            nfe['COFINS_vCOFINS'] = round_optional(cofins.find('ns:vCOFINS', ns))
-            nfe['COFINS_qBCProd'] = round_optional(cofins.find('ns:qBCProd', ns))
-            nfe['COFINS_vAliqProd'] = round_optional(cofins.find('ns:vAliqProd', ns))
+            nfe['COFINS_vBC'] = get_optional(cofins.find('ns:vBC', ns))
+            nfe['COFINS_pCOFINS'] = get_optional(cofins.find('ns:pCOFINS', ns))
+            nfe['COFINS_vCOFINS'] = get_optional(cofins.find('ns:vCOFINS', ns))
+            nfe['COFINS_qBCProd'] = get_optional(cofins.find('ns:qBCProd', ns))
+            nfe['COFINS_vAliqProd'] = get_optional(cofins.find('ns:vAliqProd', ns))
 
             # Imposto ICMSUFDest
             icmsufdest = imposto.find('ns:ICMSUFDest', ns)
             if icmsufdest:
-                nfe['ICMSUFDest_vBCUFDest'] = round_optional(icmsufdest.find('ns:vBCUFDest', ns))
-                nfe['ICMSUFDest_pFCPUFDest'] = round_optional(icmsufdest.find('ns:pFCPUFDest', ns))
-                nfe['ICMSUFDest_pICMSUFDest'] = round_optional(icmsufdest.find('ns:pICMSUFDest', ns))
-                nfe['ICMSUFDest_pICMSInter'] = round_optional(icmsufdest.find('ns:pICMSInter', ns))
-                nfe['ICMSUFDest_pICMSInterPart'] = round_optional(icmsufdest.find('ns:pICMSInterPart', ns))
-                nfe['ICMSUFDest_vFCPUFDest'] = round_optional(icmsufdest.find('ns:vFCPUFDest', ns))
-                nfe['ICMSUFDest_vICMSUFDest'] = round_optional(icmsufdest.find('ns:vICMSUFDest', ns))
-                nfe['ICMSUFDest_vICMSUFRemet'] = round_optional(icmsufdest.find('ns:vICMSUFRemet', ns))
+                nfe['ICMSUFDest_vBCUFDest'] = get_optional(icmsufdest.find('ns:vBCUFDest', ns))
+                nfe['ICMSUFDest_pFCPUFDest'] = get_optional(icmsufdest.find('ns:pFCPUFDest', ns))
+                nfe['ICMSUFDest_pICMSUFDest'] = get_optional(icmsufdest.find('ns:pICMSUFDest', ns))
+                nfe['ICMSUFDest_pICMSInter'] = get_optional(icmsufdest.find('ns:pICMSInter', ns))
+                nfe['ICMSUFDest_pICMSInterPart'] = get_optional(icmsufdest.find('ns:pICMSInterPart', ns))
+                nfe['ICMSUFDest_vFCPUFDest'] = get_optional(icmsufdest.find('ns:vFCPUFDest', ns))
+                nfe['ICMSUFDest_vICMSUFDest'] = get_optional(icmsufdest.find('ns:vICMSUFDest', ns))
+                nfe['ICMSUFDest_vICMSUFRemet'] = get_optional(icmsufdest.find('ns:vICMSUFRemet', ns))
             
             # Imposto IPI
             ipi = imposto.find('ns:IPI', ns)
@@ -337,11 +323,11 @@ def _parse_xml(path):
                     nfe['IPI_CST'] = get_optional(ipitrib.find('ns:CST', ns))
                     
                     #Some documents have vBC and pIPI others have qUnid and vUnid
-                    nfe['IPI_vBC'] = round_optional(ipitrib.find('ns:vBC', ns))
+                    nfe['IPI_vBC'] = get_optional(ipitrib.find('ns:vBC', ns))
                     nfe['IPI_pIPI'] = get_optional(ipitrib.find('ns:pIPI', ns))
                     
                     nfe['IPI_qUnid'] = get_optional(ipitrib.find('ns:qUnid', ns))
-                    nfe['IPI_vUnid'] = round_optional(ipitrib.find('ns:vUnid', ns))
+                    nfe['IPI_vUnid'] = get_optional(ipitrib.find('ns:vUnid', ns))
                     
                     nfe['IPI_vIPI'] = get_optional(ipitrib.find('ns:vIPI', ns))
 
