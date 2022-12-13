@@ -26,7 +26,7 @@ def process_nfes(local):
             'dest_xNome', 'dest_UF', 'dest_CNPJ', 
             'nNF', 'refNFe', 'dhEmi_data', 'dhEmi_hora', 'dhSaiEnt_data', 
             'dhSaiEnt_hora', 'cProd', 'xProd', 
-            'NCM', 'cEAN', 'cEANTrib', 'nRECOPI', 'CEST', 'cBenef', 'vFrete',
+            'NCM', 'cEAN', 'cEANTrib', 'uTrib', 'qTrib', 'nRECOPI', 'CEST', 'cBenef', 'vFrete',
             'cProdANVISA', 'CFOP', 'uCom', 'qCom', 'vUnCom', 'vProd', 'vDesc', 
             'vTotTrib', 
             'ICMS_orig', 'ICMS_CST', 'ICMS_CSOSN', 'ICMS_vBCSTRet', 'ICMS_pST', 
@@ -204,6 +204,8 @@ def _parse_xml(path):
             nfe['vProd'] = get_optional(prod.find('ns:vProd', ns))
             nfe['vDesc'] = get_optional(prod.find('ns:vDesc', ns))
             nfe['cEANTrib'] = get_optional(prod.find('ns:cEANTrib', ns))
+            nfe['uTrib'] = get_optional(prod.find('ns:uTrib', ns))
+            nfe['qTrib'] = get_optional(prod.find('ns:qTrib', ns))
             nfe['nRECOPI'] = get_optional(prod.find('ns:nRECOPI', ns))
             if nfe['nRECOPI']:
                 nfe['nRECOPI'] = "'" + nfe['nRECOPI'] + "'"
